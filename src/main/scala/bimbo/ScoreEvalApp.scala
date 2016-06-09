@@ -1,0 +1,25 @@
+package bimbo
+
+import breeze.linalg._
+import java.io.File
+import bimbo.data.CSVBimboItemDS
+import breeze.numerics._
+import dk.bayes.math.accuracy.rmse
+import com.typesafe.scalalogging.slf4j.LazyLogging
+
+object ScoreEvalApp extends LazyLogging {
+
+  def main(args: Array[String]): Unit = {
+
+    logger.info("Compute rmse...")
+
+    val predictionData = csvread(new File("target/submission.csv"), skipLines = 1)
+    val testItems = CSVBimboItemDS("c:/perforce/daniel/bimbo/segments/train_9.csv").getAllItems()
+
+    val actual = DenseVector(testItems.map(i => log(i.demand + 1)).toArray)
+    val predicted = predictionData(*, ::).map(r => log(r(1) + 1))
+    val rmseValue = rmse(actual, predicted)
+
+    logger.info("rmse=%.5f".format(rmseValue))
+  }
+}
