@@ -10,19 +10,22 @@ import java.util.Date
 
 case class CSVBimboTestItemDS( inputFile: String) {
 
-  def getAllItems(): Seq[TestItem] = {
+  def getAllItems(): Seq[Item] = {
 
-    val items: Seq[TestItem] = Source.fromFile(new File(inputFile)).getLines().drop(1).map { l =>
-      val item: TestItem = createItem(l)
+    val items: Seq[Item] = Source.fromFile(new File(inputFile)).getLines().drop(1).map { l =>
+      val item: Item = createItem(l)
       item
     }.toList
 
     items
   }
 
-  private def createItem(l: String): TestItem = {
+  private def createItem(l: String): Item = {
     val lArray = l.split(",")
-    val item = TestItem()
+    
+    val productId = lArray(6).toInt
+    val demand = Double.NaN
+    val item = Item(productId,demand)
     item
   }
 }

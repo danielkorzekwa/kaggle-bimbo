@@ -1,0 +1,5 @@
+group by product:
+rmse=0.68100 
+
+baseline:
+rmse=0.96912 

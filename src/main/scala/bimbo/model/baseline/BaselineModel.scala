@@ -1,11 +1,12 @@
 package bimbo.model.baseline
 
+import bimbo.data.Item
+import bimbo.model.DemandModel
 import breeze.linalg.DenseVector
-import bimbo.data.TestItem
 
-case class BaselineModel() {
+case class BaselineModel() extends DemandModel {
   
-  def predict(items:Seq[TestItem]):DenseVector[Double] = {
+  def predict(items:Seq[Item]):DenseVector[Double] = {
     DenseVector(items.map(i => 7.0).toArray)
   }
 }
