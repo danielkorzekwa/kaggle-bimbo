@@ -1,14 +1,19 @@
 package bimbo.model.groupbyfallback
 
 import java.util.concurrent.atomic.AtomicInteger
-import scala.collection._
+
+import scala.collection.Map
+import scala.collection.Seq
+import scala.collection.mutable
+
 import org.apache.spark.util.StatCounter
 
 import bimbo.data.Item
 import bimbo.model.DemandModel
 import breeze.linalg.DenseVector
-import breeze.numerics._
-case class GroupByFallbackModel[T1, T2](avgLogDemandBy2:Map[T1,Double],avgLogDemandBy: Map[T1, Double], avgLogDemandFallbackBy: Map[T2, Double])(getKey: Item => T1, getFallbackKey: Item => T2) extends DemandModel {
+import breeze.numerics.exp
+import breeze.numerics.log
+case class GroupByFallbackModel[T1, T2](avgLogDemandBy: Map[T1, StatCounter], avgLogDemandFallbackBy: Map[T2, StatCounter])(getKey: Item => T1, getFallbackKey: Item => T2) extends DemandModel {
 
   def predict(items: Seq[Item]): DenseVector[Double] = {
     val i = new AtomicInteger()
@@ -19,7 +24,18 @@ case class GroupByFallbackModel[T1, T2](avgLogDemandBy2:Map[T1,Double],avgLogDem
 
     val demandSeq = items.map { i =>
 
-      val logDemand = avgLogDemandBy.getOrElse(getKey(i), avgLogDemandFallbackBy.getOrElse(getFallbackKey(i), getDefaultDemand))
+      val logDemand = avgLogDemandBy.get(getKey(i)) match {
+        case Some(statCounter) => statCounter.mean
+        case None => {
+          avgLogDemandFallbackBy.get(getFallbackKey(i)) match {
+            case Some(fallbackStatCounter) => fallbackStatCounter.mean
+            case None                      => getDefaultDemand
+
+          }
+
+        }
+      }
+
       val demand = exp(logDemand) - 1
       demand
     }.toArray
@@ -32,22 +48,16 @@ object GroupByFallbackModel {
 
   def apply[T1, T2](trainItems: Seq[Item])(getKey: Item => T1, getFallbackKey: Item => T2): GroupByFallbackModel[T1, T2] = {
 
-    val avgLogDemandBy2 = mutable.Map[T1, StatCounter]()
-  trainItems.foreach{item =>
-      avgLogDemandBy2.getOrElseUpdate(getKey(item),new StatCounter()).merge(log(item.demand + 1))
-    }
-    
-    val avgLogDemandBy = trainItems.groupBy { i => getKey(i) }.mapValues {
-      items =>
-        val avgLogDemand = items.map(i => log(i.demand + 1)).sum.toDouble / items.size
-        avgLogDemand
+    val avgLogDemandBy = mutable.Map[T1, StatCounter]()
+    trainItems.foreach { item =>
+      avgLogDemandBy.getOrElseUpdate(getKey(item), new StatCounter()).merge(log(item.demand + 1))
     }
 
-    val avgLogDemandFallbackBy = trainItems.groupBy { i => getFallbackKey(i) }.mapValues {
-       items =>
-        val avgLogDemand = items.map(i => log(i.demand + 1)).sum.toDouble / items.size
-       avgLogDemand
+    val avgLogDemandFallbackBy = mutable.Map[T2, StatCounter]()
+    trainItems.foreach { item =>
+      avgLogDemandFallbackBy.getOrElseUpdate(getFallbackKey(item), new StatCounter()).merge(log(item.demand + 1))
     }
-    GroupByFallbackModel[T1, T2](avgLogDemandBy2,avgLogDemandBy, avgLogDemandFallbackBy)(getKey, getFallbackKey)
+
+    GroupByFallbackModel[T1, T2](avgLogDemandBy, avgLogDemandFallbackBy)(getKey, getFallbackKey)
   }
 }
