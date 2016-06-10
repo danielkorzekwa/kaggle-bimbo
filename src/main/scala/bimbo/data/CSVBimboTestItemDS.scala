@@ -8,7 +8,7 @@ import java.util.TimeZone
 import org.joda.time.LocalDate
 import java.util.Date
 
-case class CSVBimboTestItemDS( inputFile: String) {
+case class CSVBimboTestItemDS(inputFile: String) {
 
   def getAllItems(): Seq[Item] = {
 
@@ -22,10 +22,16 @@ case class CSVBimboTestItemDS( inputFile: String) {
 
   private def createItem(l: String): Item = {
     val lArray = l.split(",")
-    
+
+    val weekId = lArray(1).toInt
+    val depotId = lArray(2).toInt
+    val channelId = lArray(3).toInt
+    val routeId = lArray(4).toInt
+    val clientId = lArray(5).toInt
     val productId = lArray(6).toInt
     val demand = Double.NaN
-    val item = Item(productId,demand)
+
+    val item = Item(weekId, depotId, channelId, routeId, clientId, productId, demand)
     item
   }
 }

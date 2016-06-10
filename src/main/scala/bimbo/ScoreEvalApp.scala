@@ -6,6 +6,7 @@ import bimbo.data.CSVBimboItemDS
 import breeze.numerics._
 import dk.bayes.math.accuracy.rmse
 import com.typesafe.scalalogging.slf4j.LazyLogging
+import bimbo.data.KryoBimboItemDS
 
 object ScoreEvalApp extends LazyLogging {
 
@@ -14,7 +15,8 @@ object ScoreEvalApp extends LazyLogging {
     logger.info("Compute rmse...")
 
     val predictionData = csvread(new File("target/submission.csv"), skipLines = 1)
-    val testItems = CSVBimboItemDS("c:/perforce/daniel/bimbo/segments/train_9.csv").getAllItems()
+  //  val testItems = KryoBimboItemDS("c:/perforce/daniel/bimbo/segments/train_9.kryo").getAllItems()
+     val testItems = KryoBimboItemDS("c:/perforce/daniel/bimbo/segments/train9_depot1911.kryo").getAllItems()
 
     val actual = DenseVector(testItems.map(i => log(i.demand + 1)).toArray)
     val predicted = predictionData(*, ::).map(r => log(r(1) + 1))

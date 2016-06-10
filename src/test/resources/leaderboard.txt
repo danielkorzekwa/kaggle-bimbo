@@ -1,3 +1,9 @@
+clientproductgp with fallback and mean func:
+rmse=0.56218
+
+group by client,product, fallback to product
+rmse=0.57964 
+
 group by product:
 rmse=0.68100 
 

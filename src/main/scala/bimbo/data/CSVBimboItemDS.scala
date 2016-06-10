@@ -21,10 +21,15 @@ case class CSVBimboItemDS( inputFile: String) {
   private def createItem(l: String): Item = {
     val lArray = l.split(",")
     
+    val weekId = lArray(0).toInt
+    val depotId = lArray(1).toInt
+    val channelId =  lArray(2).toInt
+    val routeId = lArray(3).toInt
+    val clientId = lArray(4).toInt
     val productId = lArray(5).toInt
     val demand = lArray(10).toDouble
     
-    val item = Item(productId,demand)
+    val item = Item(weekId,depotId,channelId,routeId,clientId,productId,demand)
     
     item
   }
