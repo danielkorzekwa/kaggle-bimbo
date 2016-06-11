@@ -26,8 +26,10 @@ case class ItemDAO(bimboItemDS: ItemDS) {
   }
 
   def getProductItems(productId: Int): Seq[Item] = {
-    val items = loadObject[List[Item]](getProductItemsFileName(productId))
-    items
+    if (new File(getProductItemsFileName(productId)).exists())
+      loadObject[List[Item]](getProductItemsFileName(productId))
+    else List()
+
   }
 
   private def getProductsFileName(): String = {

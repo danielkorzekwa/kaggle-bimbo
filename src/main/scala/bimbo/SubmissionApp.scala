@@ -27,17 +27,14 @@ object SubmissionApp extends LazyLogging {
   def predictDemand(): DenseVector[Double] = {
 
     val trainItemsDS = CSVBimboItemDS("c:/perforce/daniel/bimbo/segments/train_3_to_8.csv")
-    logger.info("Loading test set...")
-    val testItems = KryoBimboItemDS("c:/perforce/daniel/bimbo/segments/train_9.kryo").getAllItems().filter(i => i.productId==42128)
+    val itemDAO = ItemDAO(trainItemsDS)
 
-//        logger.info("Loading train set...")
-//        val trainItemsDS = CSVBimboItemDS("c:/perforce/daniel/bimbo/segments/train_3_to_8.csv")
-//        logger.info("Loading test set...")
-//        val testItems = KryoBimboItemDS("c:/perforce/daniel/bimbo/segments/train_9.kryo").getAllItems()
+    logger.info("Loading test set...")
+    val testItems = KryoBimboItemDS("c:/perforce/daniel/bimbo/segments/train_9.kryo").getAllItems() //.filter(i => i.productId==42128)
 
     logger.info("Building model...")
     //   val model = GroupByFallbackModel[(Int, Int), Int](trainItemsDS.getAllItems())(i => (i.clientId, i.productId), i => (i.productId))
-    val model = GroupByFallbackModel[(Int, Int)](i => (i.clientId, i.productId), ItemDAO(trainItemsDS))
+    val model = GroupByFallbackModel[(Int, Int)](i => (i.clientId, i.productId), itemDAO)
 
     //val model = ClientProductGPModel(trainItemsDS.getAllItems())
     //      val model = ClientProductGPModel2(ItemDAO(trainItemsDS))
