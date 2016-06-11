@@ -2,12 +2,11 @@ package bimbo
 
 import com.typesafe.scalalogging.slf4j.LazyLogging
 import bimbo.data.KryoBimboItemDS
-import bimbo.model.clientproductgp.ClientProductGPModel
 import breeze.linalg._
 import dk.gp.util.csvwrite
-import bimbo.model.clientproductgp2.ClientProductGPModel2
 import bimbo.data.ItemDAO
 import bimbo.data.CSVBimboItemDS
+import bimbo.model.groupbyfallback.GroupByFallbackModel
 
 object SubmissionApp extends LazyLogging {
 
@@ -26,23 +25,23 @@ object SubmissionApp extends LazyLogging {
   }
 
   def predictDemand(): DenseVector[Double] = {
-      
-//      logger.info("Loading train set...")
-//      val trainItemsDS = KryoBimboItemDS("c:/perforce/daniel/bimbo/segments/train3_8_depot1911.kryo")
-//      logger.info("Loading test set...")
-//      val testItems = KryoBimboItemDS("c:/perforce/daniel/bimbo/segments/train9_depot1911.kryo").getAllItems()
 
     logger.info("Loading train set...")
-    val trainItemsDS = CSVBimboItemDS("c:/perforce/daniel/bimbo/segments/train_3_to_8.csv")
+    val trainItemsDS = KryoBimboItemDS("c:/perforce/daniel/bimbo/segments/train3_8_depot1911.kryo")
     logger.info("Loading test set...")
-    val testItems = KryoBimboItemDS("c:/perforce/daniel/bimbo/segments/train_9.kryo").getAllItems()
+    val testItems = KryoBimboItemDS("c:/perforce/daniel/bimbo/segments/train9_depot1911.kryo").getAllItems()
+
+    //    logger.info("Loading train set...")
+    //    val trainItemsDS = CSVBimboItemDS("c:/perforce/daniel/bimbo/segments/train_3_to_8.csv")
+    //    logger.info("Loading test set...")
+    //    val testItems = KryoBimboItemDS("c:/perforce/daniel/bimbo/segments/train_9.kryo").getAllItems()
 
     logger.info("Building model...")
     //   val model = GroupByFallbackModel[(Int, Int), Int](trainItemsDS.getAllItems())(i => (i.clientId, i.productId), i => (i.productId))
-   // val model = GroupByFallbackModel2[(Int, Int)](i => (i.clientId, i.productId), ItemDAO(trainItemsDS))
+    val model = GroupByFallbackModel[(Int, Int)](i => (i.clientId, i.productId), ItemDAO(trainItemsDS))
 
-        //val model = ClientProductGPModel(trainItemsDS.getAllItems())
-            val model = ClientProductGPModel2(ItemDAO(trainItemsDS))
+    //val model = ClientProductGPModel(trainItemsDS.getAllItems())
+    //      val model = ClientProductGPModel2(ItemDAO(trainItemsDS))
     logger.info("Predicting demand...")
     val predictedDemand = model.predict(testItems)
 

@@ -1,4 +1,4 @@
-package bimbo.model.clientproductgp2
+package bimbo.model.clientproductgp
 
 import bimbo.model.DemandModel
 import breeze.linalg.DenseVector
@@ -19,23 +19,7 @@ import bimbo.data.ItemDAO
 case class ClientProductGPModel2(trainItemDAO: ItemDAO)
     extends DemandModel with LazyLogging {
 
-  def predict(items: Seq[Item]): DenseVector[Double] = {
-
-    val itemsByProduct = items.groupBy { i => i.productId }
-
-    val i = new AtomicInteger(1)
-    val predictedDemandByItem: Map[Item, Double] = itemsByProduct.toList.flatMap {
-      case (productId, productItems) =>
-        logger.info("Predicting product %d/%d".format(i.getAndIncrement, itemsByProduct.size))
-        predictProductDemand(productId, productItems)
-    }.toMap
-
-    val predictedDemand = DenseVector(items.map(i => predictedDemandByItem(i)).toArray)
-
-    predictedDemand
-  }
-
-  private def predictProductDemand(productId: Int, productItems: Seq[Item]): Seq[(Item, Double)] = {
+  def predictProductDemand(productId: Int, productItems: Seq[Item]): Seq[(Item, Double)] = {
 
     val trainProductItems = trainItemDAO.getProductItems(productId)
 
