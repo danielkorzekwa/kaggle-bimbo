@@ -71,7 +71,6 @@ object ClientProductGPModel {
 
         val gpModel = createGprModel(items, demandMean)
 
-        val avgLogDemand = items.map(i => log(i.demand + 1)).sum.toDouble / items.size
         (clientId, productId) -> gpModel
     }
 
@@ -81,7 +80,6 @@ object ClientProductGPModel {
   private def createGprModel(items: Seq[Item], demandMean: Double): GprModel = {
     val x = DenseMatrix(items.map(i => 1d).toArray).t
     val y = DenseVector(items.map(i => log(i.demand + 1)).toArray)
-    println(x.rows)
     val covFunc = CovSEiso()
     val covFuncParams = DenseVector(log(1), log(1))
     val noiseLogStdDev = log(1)

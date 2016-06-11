@@ -8,7 +8,7 @@ import java.util.TimeZone
 import org.joda.time.LocalDate
 import java.util.Date
 
-case class CSVBimboTestItemDS(inputFile: String) {
+case class CSVBimboTestItemDS(inputFile: String) extends ItemDS {
 
   def getAllItems(): Seq[Item] = {
 

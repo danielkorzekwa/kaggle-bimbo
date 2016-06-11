@@ -6,7 +6,7 @@ import scala.io.Source
 
 import com.typesafe.scalalogging.slf4j.LazyLogging
 
-case class CSVBimboItemDS( inputFile: String) {
+case class CSVBimboItemDS( inputFile: String) extends ItemDS{
 
   def getAllItems(): Seq[Item] = {
 

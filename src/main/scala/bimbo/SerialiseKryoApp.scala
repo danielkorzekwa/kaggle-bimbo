@@ -8,7 +8,7 @@ object SerialiseKryoApp {
 
   def main(args: Array[String]): Unit = {
 
-    val inputFile = "c:/perforce/daniel/bimbo/segments/train_3_to_8"
+    val inputFile = "c:/perforce/daniel/bimbo/segments/train_9"
     val items = CSVBimboItemDS(inputFile + ".csv").getAllItems()
     saveObject(items, inputFile + ".kryo")
 
