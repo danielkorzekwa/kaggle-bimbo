@@ -9,4 +9,6 @@ case class KryoBimboItemDS(bimboFile: String) extends ItemDS {
   def getAllItems(): Seq[Item] = {
     items
   }
+  
+   def getDSFile():String = bimboFile
 }

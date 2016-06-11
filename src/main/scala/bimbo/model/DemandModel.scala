@@ -14,7 +14,7 @@ trait DemandModel extends LazyLogging {
     val i = new AtomicInteger(1)
     val predictedDemandByItem: Map[Item, Double] = itemsByProduct.toList.flatMap {
       case (productId, productItems) =>
-        if (i.get % 10 == 0) logger.info("Predicting product %d/%d".format(i.getAndIncrement, itemsByProduct.size))
+        if (i.getAndIncrement % 10 == 0) logger.info("Predicting product %d/%d".format(i.get, itemsByProduct.size))
         predictProductDemand(productId, productItems)
     }.toMap
 

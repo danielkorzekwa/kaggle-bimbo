@@ -28,13 +28,13 @@ case class GroupByFallbackModel[T1](getKey: Item => T1, trainItemDAO: ItemDAO) e
       getValue = (item: Item) => log(item.demand + 1),
       getDefault = (item: Item) => StatCounter(productMeanLogDemand))
 
-//      val routeClientProductCounter = StatCounterByKey[Item, (Int, Int,Int)](trainProductItems)(
-//      getKey = (item: Item) => (item.routeId,item.clientId, item.productId),
-//      getValue = (item: Item) => log(item.demand + 1),
-//      getDefault = (item: Item) => clientProductStatCounter.getStatCounter(item))
+      val routeClientProductCounter = StatCounterByKey[Item, (Int, Int,Int)](trainProductItems)(
+      getKey = (item: Item) => (item.routeId,item.clientId, item.productId),
+      getValue = (item: Item) => log(item.demand + 1),
+      getDefault = (item: Item) => clientProductStatCounter.getStatCounter(item))
       
     val predictedProductDemand = productItems.map { item =>
-      val logDemand = clientProductStatCounter.getStatCounter(item).mean
+      val logDemand = routeClientProductCounter.getStatCounter(item).mean
       val demand = exp(logDemand) - 1
       (item, demand)
     }

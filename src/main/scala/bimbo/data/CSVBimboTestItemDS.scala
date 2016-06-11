@@ -10,6 +10,8 @@ import java.util.Date
 
 case class CSVBimboTestItemDS(inputFile: String) extends ItemDS {
 
+   def getDSFile():String = inputFile
+  
   def getAllItems(): Seq[Item] = {
 
     val items: Seq[Item] = Source.fromFile(new File(inputFile)).getLines().drop(1).map { l =>
