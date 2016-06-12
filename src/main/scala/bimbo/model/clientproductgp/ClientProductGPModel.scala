@@ -15,46 +15,46 @@ import org.apache.spark.util.StatCounter
 import scala.collection._
 import com.typesafe.scalalogging.slf4j.LazyLogging
 import bimbo.data.ItemDAO
+import bimbo.model.clientproductgp.priordemand.PriorLogDemandModel
 
-case class ClientProductGPModel2(trainItemDAO: ItemDAO)
+case class ClientProductGPModel(trainItemDAO: ItemDAO)
     extends DemandModel with LazyLogging {
 
   def predictProductDemand(productId: Int, productItems: Seq[Item]): Seq[(Item, Double)] = {
 
     val trainProductItems = trainItemDAO.getProductItems(productId)
 
-    val productMeanLogDemand = if (trainProductItems.size == 0) log(7d + 1) else {
-      trainProductItems.map(i => log(i.demand + 1)).sum / trainProductItems.size
-    }
+    val priorDemandModel = PriorLogDemandModel(trainProductItems)
 
     val gpModelsByClientProduct = trainProductItems.groupBy { i => getKey(i) }.map {
       case ((clientId, productId), items) =>
-        val gpModel = createGprModel(items, productMeanLogDemand)
+        val priorLogDemand = priorDemandModel.predictLogDemand(items.head)
+        val gpModel = createGprModel(items, priorLogDemand)
         (clientId, productId) -> gpModel
     }
 
-    val predictedProductDemand = productItems.map { i =>
+    val predictedProductDemand = productItems.map { item =>
 
-      val gpModel = gpModelsByClientProduct.get(getKey(i))
+      val gpModel = gpModelsByClientProduct.get(getKey(item))
       val logDemand = gpModel match {
-        case Some(gpModel) => {
-          val x = DenseMatrix(1d)
+        case Some(gpModel)=> {
+          val x = extractFeatureVec(item).toDenseMatrix
           val logDemand = dk.gp.gpr.predict(x, gpModel)(0, 0)
           logDemand
         }
-        case None => productMeanLogDemand
+        case _ => priorDemandModel.predictLogDemand(item)
       }
 
       val demand = exp(logDemand) - 1
 
-      (i, demand)
+      (item, demand)
     }
 
     predictedProductDemand
   }
 
   private def createGprModel(items: Seq[Item], demandMean: Double): GprModel = {
-    val x = DenseMatrix(items.map(i => 1d).toArray).t
+    val x = DenseVector.horzcat(items.map(i => extractFeatureVec(i)): _*).t
     val y = DenseVector(items.map(i => log(i.demand + 1)).toArray)
     val covFunc = CovSEiso()
     val covFuncParams = DenseVector(log(1), log(1))

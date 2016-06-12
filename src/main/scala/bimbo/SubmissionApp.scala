@@ -7,6 +7,7 @@ import dk.gp.util.csvwrite
 import bimbo.data.ItemDAO
 import bimbo.data.CSVBimboItemDS
 import bimbo.model.groupbyfallback.GroupByFallbackModel
+import bimbo.model.clientproductgp.ClientProductGPModel
 
 object SubmissionApp extends LazyLogging {
 
@@ -30,14 +31,12 @@ object SubmissionApp extends LazyLogging {
     val itemDAO = ItemDAO(trainItemsDS)
 
     logger.info("Loading test set...")
-    val testItems = KryoBimboItemDS("c:/perforce/daniel/bimbo/segments/train_9.kryo").getAllItems() //.filter(i => i.productId==42128)
+    val testItems = KryoBimboItemDS("c:/perforce/daniel/bimbo/segments/train_9.kryo").getAllItems()//.filter(i => i.productId == 43174)
 
     logger.info("Building model...")
-    //   val model = GroupByFallbackModel[(Int, Int), Int](trainItemsDS.getAllItems())(i => (i.clientId, i.productId), i => (i.productId))
-    val model = GroupByFallbackModel[(Int, Int)](i => (i.clientId, i.productId), itemDAO)
+  //  val model = GroupByFallbackModel( itemDAO)
+    val model = ClientProductGPModel(itemDAO)
 
-    //val model = ClientProductGPModel(trainItemsDS.getAllItems())
-    //      val model = ClientProductGPModel2(ItemDAO(trainItemsDS))
     logger.info("Predicting demand...")
     val predictedDemand = model.predict(testItems)
 

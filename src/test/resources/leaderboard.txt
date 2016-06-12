@@ -1,3 +1,6 @@
+gp (client,product), routeID (covSeIso) learned on 42128 only
+rmse=0.50861 
+
 gp (client,product), all data
 rmse=0.49716 
 

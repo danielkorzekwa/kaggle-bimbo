@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicInteger
 import com.typesafe.scalalogging.slf4j.LazyLogging
 import bimbo.util.StatCounterByKey
 
-case class GroupByFallbackModel[T1](getKey: Item => T1, trainItemDAO: ItemDAO) extends DemandModel with LazyLogging {
+case class GroupByFallbackModel( trainItemDAO: ItemDAO) extends DemandModel with LazyLogging {
 
   def predictProductDemand(productId: Int, productItems: Seq[Item]): Seq[(Item, Double)] = {
 
