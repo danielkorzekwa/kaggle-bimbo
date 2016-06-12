@@ -26,11 +26,11 @@ case class PriorLogDemandModel(items: Seq[Item]) {
   val gprModel = GprModel(x, y, CovSEiso(), DenseVector(log(1), log(1)), log(1))
 
   def predictLogDemand(item: Item): Double = {
-
-    val priorLogDemand2 = avgLogWeeklySaleByClient.get(item.clientId) match {
-      case Some(avgLogWeeklySale) => predict(DenseMatrix(avgLogWeeklySale), gprModel)(0, 0)
-      case None                   => priorLogDemand
-    }
-    priorLogDemand2
+//
+//    val priorLogDemand2 = avgLogWeeklySaleByClient.get(item.clientId) match {
+//      case Some(avgLogWeeklySale) => predict(DenseMatrix(avgLogWeeklySale), gprModel)(0, 0)
+//      case None                   => priorLogDemand
+//    }
+    priorLogDemand
   }
 }
