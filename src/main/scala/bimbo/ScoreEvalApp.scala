@@ -2,11 +2,11 @@ package bimbo
 
 import breeze.linalg._
 import java.io.File
-import bimbo.data.CSVBimboItemDS
+import bimbo.data.ds.CSVBimboItemDS
 import breeze.numerics._
 import dk.bayes.math.accuracy.rmse
 import com.typesafe.scalalogging.slf4j.LazyLogging
-import bimbo.data.KryoBimboItemDS
+import bimbo.data.ds.KryoBimboItemDS
 
 object ScoreEvalApp extends LazyLogging {
 

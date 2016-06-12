@@ -14,17 +14,18 @@ import java.util.concurrent.atomic.AtomicInteger
 import org.apache.spark.util.StatCounter
 import scala.collection._
 import com.typesafe.scalalogging.slf4j.LazyLogging
-import bimbo.data.ItemDAO
+import bimbo.data.dao.ItemDAO
 import bimbo.model.clientproductgp.priordemand.PriorLogDemandModel
+import bimbo.data.dao.AvgLogWeeklySaleDAO
 
-case class ClientProductGPModel(trainItemDAO: ItemDAO)
+case class ClientProductGPModel(trainItemDAO: ItemDAO,avgLogWeeklySaleByClientDAO:AvgLogWeeklySaleDAO)
     extends DemandModel with LazyLogging {
 
   def predictProductDemand(productId: Int, productItems: Seq[Item]): Seq[(Item, Double)] = {
 
     val trainProductItems = trainItemDAO.getProductItems(productId)
 
-    val priorDemandModel = PriorLogDemandModel(trainProductItems)
+    val priorDemandModel = PriorLogDemandModel(trainProductItems,avgLogWeeklySaleByClientDAO)
 
     val gpModelsByClientProduct = trainProductItems.groupBy { i => getKey(i) }.map {
       case ((clientId, productId), items) =>

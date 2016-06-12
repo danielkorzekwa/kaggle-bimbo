@@ -1,10 +1,9 @@
-package bimbo.data
+package bimbo.data.ds
 
 import java.io.File
-
 import scala.io.Source
-
-import com.typesafe.scalalogging.slf4j.LazyLogging
+import bimbo.data.Item
+import bimbo.data.ds.ItemDS
 
 case class CSVBimboItemDS( inputFile: String) extends ItemDS{
 

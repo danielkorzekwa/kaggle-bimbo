@@ -1,7 +1,7 @@
 package bimbo
 
-import bimbo.data.ItemDAO
-import bimbo.data.CSVBimboItemDS
+import bimbo.data.dao.ItemDAO
+import bimbo.data.ds.CSVBimboItemDS
 import bimbo.model.clientproductgp.trainClientProductGPModel
 
 object TrainClientProductGPApp {

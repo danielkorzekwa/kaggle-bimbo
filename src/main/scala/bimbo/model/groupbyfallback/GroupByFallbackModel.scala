@@ -3,7 +3,7 @@ package bimbo.model.groupbyfallback
 import scala.collection.Map
 import scala.collection.Seq
 import bimbo.data.Item
-import bimbo.data.ItemDAO
+import bimbo.data.dao.ItemDAO
 import bimbo.model.DemandModel
 import breeze.linalg.DenseVector
 import breeze.numerics._

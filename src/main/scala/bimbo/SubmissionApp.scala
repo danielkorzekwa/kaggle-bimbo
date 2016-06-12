@@ -1,13 +1,15 @@
 package bimbo
 
 import com.typesafe.scalalogging.slf4j.LazyLogging
-import bimbo.data.KryoBimboItemDS
+import bimbo.data.ds.KryoBimboItemDS
 import breeze.linalg._
 import dk.gp.util.csvwrite
-import bimbo.data.ItemDAO
-import bimbo.data.CSVBimboItemDS
+import bimbo.data.dao.ItemDAO
 import bimbo.model.groupbyfallback.GroupByFallbackModel
 import bimbo.model.clientproductgp.ClientProductGPModel
+import bimbo.data.ds.KryoBimboItemDS
+import bimbo.data.ds.CSVBimboItemDS
+import bimbo.data.dao.AvgLogWeeklySaleDAO
 
 object SubmissionApp extends LazyLogging {
 
@@ -30,12 +32,15 @@ object SubmissionApp extends LazyLogging {
     val trainItemsDS = CSVBimboItemDS("c:/perforce/daniel/bimbo/segments/train_3_to_8.csv")
     val itemDAO = ItemDAO(trainItemsDS)
 
+    val avgLogWeeklySaleByClientDAO = AvgLogWeeklySaleDAO()
+
+    
     logger.info("Loading test set...")
-    val testItems = KryoBimboItemDS("c:/perforce/daniel/bimbo/segments/train_9.kryo").getAllItems()//.filter(i => i.productId == 43174)
+    val testItems = KryoBimboItemDS("c:/perforce/daniel/bimbo/segments/train_9.kryo").getAllItems() //.filter(i => i.productId == 43174)
 
     logger.info("Building model...")
-  //  val model = GroupByFallbackModel( itemDAO)
-    val model = ClientProductGPModel(itemDAO)
+    //  val model = GroupByFallbackModel( itemDAO)
+    val model = ClientProductGPModel(itemDAO,avgLogWeeklySaleByClientDAO)
 
     logger.info("Predicting demand...")
     val predictedDemand = model.predict(testItems)

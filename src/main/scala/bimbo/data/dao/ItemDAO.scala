@@ -1,8 +1,10 @@
-package bimbo.data
+package bimbo.data.dao
 
 import java.io.File
 import dk.gp.util.saveObject
 import dk.gp.util.loadObject
+import bimbo.data.Item
+import bimbo.data.ds.ItemDS
 
 case class ItemDAO(bimboItemDS: ItemDS) {
 
