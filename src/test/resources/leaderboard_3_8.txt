@@ -1,4 +1,4 @@
-gp (client,product), all data, gp prior(client sale)
+gp (client,product), all data, gp prior(client sale) - 1306
 rmse=0.46619
 
 gp (client,product), all data

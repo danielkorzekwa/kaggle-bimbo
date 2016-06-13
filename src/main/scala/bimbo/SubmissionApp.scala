@@ -10,6 +10,7 @@ import bimbo.model.clientproductgp.ClientProductGPModel
 import bimbo.data.ds.KryoBimboItemDS
 import bimbo.data.ds.CSVBimboItemDS
 import bimbo.data.dao.AvgLogWeeklySaleDAO
+import bimbo.data.ds.CSVBimboTestItemDS
 
 object SubmissionApp extends LazyLogging {
 
@@ -29,18 +30,36 @@ object SubmissionApp extends LazyLogging {
 
   def predictDemand(): DenseVector[Double] = {
 
-    val trainItemsDS = CSVBimboItemDS("c:/perforce/daniel/bimbo/segments/train_3_to_7.csv")
+    val trainItemsDS = CSVBimboItemDS("c:/perforce/daniel/bimbo/segments/train_3_to_8.csv")
     val itemDAO = ItemDAO(trainItemsDS)
 
-    val avgLogWeeklySaleByClientDAO = AvgLogWeeklySaleDAO("c:/perforce/daniel/bimbo/stats/clientAvgLogWeeklySale_3_7.csv")
+    val avgLogWeeklySaleByClientDAO = AvgLogWeeklySaleDAO("c:/perforce/daniel/bimbo/stats/clientAvgLogWeeklySale_3_8.csv")
 
-    
     logger.info("Loading test set...")
-    val testItems = KryoBimboItemDS("c:/perforce/daniel/bimbo/segments/train_9.kryo").getAllItems()//.filter(i => i.productId == 1240)
+     val testItems = KryoBimboItemDS("c:/perforce/daniel/bimbo/segments/train_9.kryo").getAllItems().filter(i => i.productId == 2233)
 
     logger.info("Building model...")
     //  val model = GroupByFallbackModel( itemDAO)
-    val model = ClientProductGPModel(itemDAO,avgLogWeeklySaleByClientDAO)
+    val model = ClientProductGPModel(itemDAO, avgLogWeeklySaleByClientDAO)
+
+    logger.info("Predicting demand...")
+    val predictedDemand = model.predict(testItems)
+
+    predictedDemand
+  }
+  
+   def predictDemandSubmission(): DenseVector[Double] = {
+
+    val trainItemsDS = CSVBimboItemDS("c:/perforce/daniel/bimbo/train.csv")
+    val itemDAO = ItemDAO(trainItemsDS)
+
+    val avgLogWeeklySaleByClientDAO = AvgLogWeeklySaleDAO("c:/perforce/daniel/bimbo/stats/clientAvgLogWeeklySale_3_9.csv")
+
+    logger.info("Loading test set...")
+    val testItems = CSVBimboTestItemDS("c:/perforce/daniel/bimbo/test.csv").getAllItems()
+
+    logger.info("Building model...")
+    val model = ClientProductGPModel(itemDAO, avgLogWeeklySaleByClientDAO)
 
     logger.info("Predicting demand...")
     val predictedDemand = model.predict(testItems)

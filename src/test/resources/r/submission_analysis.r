@@ -16,8 +16,3 @@ merged[,list(c= .N,rmse=sqrt(mean(se))),by=Producto_ID][order(Producto_ID)][Prod
 #plot over time
 d <- train_all2[Producto_ID==42128][1:1000]
 ggplot() + stat_summary(fun.y="mean",geom="point",aes(x=d$Venta_hoy_avglog,y=d$Demanda_uni_equil))
-
-
-#Compute avg log venta hoy
-Venta_hoy_avglog <- train_all[,list(Venta_hoy_avglog = log(sum(Venta_hoy+1))),by=list(Semana,Cliente_ID)]
-Venta_hoy_avglog <- Venta_hoy_avglog[,list(Venta_hoy_avglog=mean(Venta_hoy_avglog)),by=Cliente_ID]

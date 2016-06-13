@@ -9,27 +9,35 @@ import dk.gp.cov.CovSEiso
 import dk.gp.mtgpr.mtgprTrain
 import com.typesafe.scalalogging.slf4j.LazyLogging
 import bimbo.model.clientproductgp.priordemand.calcProductMeanLogDemand
+import bimbo.model.clientproductgp.priordemand.PriorLogDemandModel
+import bimbo.data.dao.AvgLogWeeklySaleDAO
 
 object trainClientProductGPModel extends LazyLogging {
 
   /**
    * @return (covFuncParams,noiseLogStdDev)
    */
-  def apply(items: Seq[Item]): (DenseVector[Double], Double) = {
+  def apply(productItems: Seq[Item], avgLogWeeklySaleByClientDAO: AvgLogWeeklySaleDAO): (DenseVector[Double], Double) = {
 
-    val productMeanLogDemand = calcProductMeanLogDemand(items)
+    logger.info("Number of items:" + productItems.size)
+    
+    val productItemsByClient = productItems.groupBy { i => getKey(i) }.filter{case (key,items) => items.size > 0 && items.size<1000}
+    
+     val priorDemandModel = PriorLogDemandModel(productItems, avgLogWeeklySaleByClientDAO)
+     
+    val mtgprData = productItemsByClient.map {
+      case ((clientId, productId), clientProductItems) =>
 
-    val mtgprData = items.groupBy { i => getKey(i) }.filter(_._2.size < 500).map {
-      case ((clientId, productId), items) =>
+        val x = extractFeatureVec(clientProductItems)
 
-        val x = extractFeatureVec(items)
-        val y = DenseVector(items.map(i => log(i.demand + 1)).toArray) - productMeanLogDemand
+        val priorLogDemand = priorDemandModel.predictLogDemand(clientProductItems.head)
+        val y = DenseVector(clientProductItems.map(i => log(i.demand + 1)).toArray) - priorLogDemand
 
         DenseMatrix.horzcat(x, y.toDenseMatrix.t)
     }.toList
     logger.info("Training data:" + mtgprData.size)
 
-    val covFunc = CovSEiso()
+    val covFunc = RouteCovFunc()
     val covFuncParams = DenseVector(log(1), log(1))
     val noiseLogStdDev = log(1)
     val mtGrpModel = MtGprModel(mtgprData, covFunc, covFuncParams, noiseLogStdDev)

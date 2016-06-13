@@ -25,8 +25,9 @@ case class ItemDAO(bimboItemDS: ItemDS) extends LazyLogging {
         case (productId, items) =>
           saveObject(items, getProductItemsFileName(productId))
       }
+      logger.info("Caching items by product on disk...done")
     }
-    logger.info("Caching items by product on disk...done")
+
   }
 
   def getProductItems(productId: Int): Seq[Item] = {
