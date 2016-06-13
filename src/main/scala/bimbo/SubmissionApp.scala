@@ -29,14 +29,14 @@ object SubmissionApp extends LazyLogging {
 
   def predictDemand(): DenseVector[Double] = {
 
-    val trainItemsDS = CSVBimboItemDS("c:/perforce/daniel/bimbo/segments/train_3_to_8.csv")
+    val trainItemsDS = CSVBimboItemDS("c:/perforce/daniel/bimbo/segments/train_3_to_7.csv")
     val itemDAO = ItemDAO(trainItemsDS)
 
-    val avgLogWeeklySaleByClientDAO = AvgLogWeeklySaleDAO()
+    val avgLogWeeklySaleByClientDAO = AvgLogWeeklySaleDAO("c:/perforce/daniel/bimbo/stats/clientAvgLogWeeklySale_3_7.csv")
 
     
     logger.info("Loading test set...")
-    val testItems = KryoBimboItemDS("c:/perforce/daniel/bimbo/segments/train_9.kryo").getAllItems() //.filter(i => i.productId == 43174)
+    val testItems = KryoBimboItemDS("c:/perforce/daniel/bimbo/segments/train_9.kryo").getAllItems()//.filter(i => i.productId == 1240)
 
     logger.info("Building model...")
     //  val model = GroupByFallbackModel( itemDAO)

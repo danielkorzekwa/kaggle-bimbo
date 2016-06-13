@@ -33,7 +33,6 @@ case class ClientProductGPModel(trainItemDAO: ItemDAO,avgLogWeeklySaleByClientDA
         val gpModel = createGprModel(items, priorLogDemand)
         (clientId, productId) -> gpModel
     }
-
     val predictedProductDemand = productItems.map { item =>
 
       val gpModel = gpModelsByClientProduct.get(getKey(item))

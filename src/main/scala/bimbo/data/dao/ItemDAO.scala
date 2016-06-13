@@ -5,15 +5,16 @@ import dk.gp.util.saveObject
 import dk.gp.util.loadObject
 import bimbo.data.Item
 import bimbo.data.ds.ItemDS
+import com.typesafe.scalalogging.slf4j.LazyLogging
 
-case class ItemDAO(bimboItemDS: ItemDS) {
+case class ItemDAO(bimboItemDS: ItemDS) extends LazyLogging {
 
   init()
 
   private def init() = {
 
     if (!new File(getProductsFileName).exists()) {
-
+      logger.info("Caching items by product on disk...")
       val items = bimboItemDS.getAllItems()
       val itemsByProduct = items.groupBy { i => i.productId }
 
@@ -25,6 +26,7 @@ case class ItemDAO(bimboItemDS: ItemDS) {
           saveObject(items, getProductItemsFileName(productId))
       }
     }
+    logger.info("Caching items by product on disk...done")
   }
 
   def getProductItems(productId: Int): Seq[Item] = {

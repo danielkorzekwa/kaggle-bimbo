@@ -8,6 +8,7 @@ import breeze.numerics._
 import dk.gp.cov.CovSEiso
 import dk.gp.mtgpr.mtgprTrain
 import com.typesafe.scalalogging.slf4j.LazyLogging
+import bimbo.model.clientproductgp.priordemand.calcProductMeanLogDemand
 
 object trainClientProductGPModel extends LazyLogging {
 

@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicInteger
 import com.typesafe.scalalogging.slf4j.LazyLogging
 import bimbo.util.StatCounterByKey
 
-case class GroupByFallbackModel( trainItemDAO: ItemDAO) extends DemandModel with LazyLogging {
+case class GroupByFallbackModel(trainItemDAO: ItemDAO) extends DemandModel with LazyLogging {
 
   def predictProductDemand(productId: Int, productItems: Seq[Item]): Seq[(Item, Double)] = {
 
@@ -23,16 +23,16 @@ case class GroupByFallbackModel( trainItemDAO: ItemDAO) extends DemandModel with
       trainProductItems.map(i => log(i.demand + 1)).sum / trainProductItems.size
     }
 
-    val clientProductStatCounter = StatCounterByKey[Item, (Int, Int)](trainProductItems)(
-      getKey = (item: Item) => (item.clientId, item.productId),
-      getValue = (item: Item) => log(item.demand + 1),
-      getDefault = (item: Item) => StatCounter(productMeanLogDemand))
+    val clientProductStatCounter = StatCounterByKey(trainProductItems)(
+      getKey = item => (item.clientId, item.productId),
+      getValue = item => log(item.demand + 1),
+      getDefault = item => Some(StatCounter(productMeanLogDemand)))
 
-//      val routeClientProductCounter = StatCounterByKey[Item, (Int, Int,Int)](trainProductItems)(
-//      getKey = (item: Item) => (item.routeId,item.clientId, item.productId),
-//      getValue = (item: Item) => log(item.demand + 1),
-//      getDefault = (item: Item) => clientProductStatCounter.getStatCounter(item))
-      
+    //      val routeClientProductCounter = StatCounterByKey[Item, (Int, Int,Int)](trainProductItems)(
+    //      getKey = (item: Item) => (item.routeId,item.clientId, item.productId),
+    //      getValue = (item: Item) => log(item.demand + 1),
+    //      getDefault = (item: Item) => clientProductStatCounter.getStatCounter(item))
+
     val predictedProductDemand = productItems.map { item =>
       val logDemand = clientProductStatCounter.getStatCounter(item).mean
       val demand = exp(logDemand) - 1

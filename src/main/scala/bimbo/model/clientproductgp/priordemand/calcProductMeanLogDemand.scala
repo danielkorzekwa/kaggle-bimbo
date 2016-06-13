@@ -1,4 +1,4 @@
-package bimbo.model.clientproductgp
+package bimbo.model.clientproductgp.priordemand
 
 import bimbo.data.Item
 import breeze.numerics._

@@ -1,11 +1,14 @@
-gp (client,product), routeID (covSeIso) learned on 42128 only
-rmse=0.50861 
+gp (client,product), all data, gp prior(client sale)
+rmse=0.46619
 
 gp (client,product), all data
 rmse=0.49716 
 
 group by client,product, fallback to product (all data)
 rmse=0.50780 
+
+gp (client,product), routeID (covSeIso) learned on 42128 only
+rmse=0.50861 
 
 clientproductgp with fallback and mean func:
 rmse=0.56218
