@@ -22,7 +22,7 @@ object SubmissionApp extends LazyLogging {
     val predictedDemand = predictDemand()
 
     logger.info("Saving submission...")
-    val idColumn = DenseVector.rangeD(0, predictedDemand.size, 1)
+    val idColumn = if(predictedDemand.size==1) DenseVector(0.0) else DenseVector.rangeD(0, predictedDemand.size, 1)
     val predictionMat = DenseVector.horzcat(idColumn, predictedDemand)
     csvwrite("target/submission.csv", predictionMat, header = "id,Demanda_uni_equil")
 
@@ -39,7 +39,7 @@ object SubmissionApp extends LazyLogging {
 
     logger.info("Loading test set...")
     val allTestItemsDAO = AllTrainItemsDAO("c:/perforce/daniel/bimbo/segments/train_9.csv", clientNamesDAO)
-     val testItems = ItemDAO(allTestItemsDAO).getProductItems(1242)//.filter(i => i.clientId==653378 && (i.routeId==3001 || i.routeId==3023))
+     val testItems = ItemDAO(allTestItemsDAO).getProductItems(6469).filter(i => i.clientId==1334987)
     //val testItems = AllTrainItemsDAO("c:/perforce/daniel/bimbo/segments/train_9.csv", clientNamesDAO).getAllItems()//.filter(i => i.productId == 1240)
 
     logger.info("Building model...")

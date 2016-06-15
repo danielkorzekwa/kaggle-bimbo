@@ -79,10 +79,10 @@ case class ClientProductGPModel(trainItemDAO: ItemDAO, avgLogWeeklySaleByClientD
     val covFuncParams = DenseVector(log(1), log(1))
     val noiseLogStdDev = log(1)
 
-    //train 1250
+    //train 31198
 //        val covFunc = CovSEiso()
-//    val covFuncParams = DenseVector(-0.999517464335511, 0.0)
-//    val noiseLogStdDev = -0.876163
+//    val covFuncParams = DenseVector(0.7826424318670169, 0.0)
+//    val noiseLogStdDev = -0.413239
     GprModel(x, y, covFunc, covFuncParams, noiseLogStdDev, mean = demandMean)
   }
 
