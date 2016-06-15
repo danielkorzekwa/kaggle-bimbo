@@ -4,10 +4,10 @@ import java.io.File
 import dk.gp.util.saveObject
 import dk.gp.util.loadObject
 import bimbo.data.Item
-import bimbo.data.ds.ItemDS
 import com.typesafe.scalalogging.slf4j.LazyLogging
+import bimbo.data.dao.allitems.AllItemsDAO
 
-case class ItemDAO(bimboItemDS: ItemDS) extends LazyLogging {
+case class ItemDAO(allItemsDAO:AllItemsDAO) extends LazyLogging {
 
   init()
 
@@ -15,7 +15,7 @@ case class ItemDAO(bimboItemDS: ItemDS) extends LazyLogging {
 
     if (!new File(getProductsFileName).exists()) {
       logger.info("Caching items by product on disk...")
-      val items = bimboItemDS.getAllItems()
+      val items = allItemsDAO.getAllItems()
       val itemsByProduct = items.groupBy { i => i.productId }
 
       val productList = itemsByProduct.keys.toList
@@ -36,16 +36,18 @@ case class ItemDAO(bimboItemDS: ItemDS) extends LazyLogging {
     else List()
 
   }
+  
+  def getProductIds():Seq[Int] = loadObject[List[Int]](getProductsFileName)
 
   private def getProductsFileName(): String = {
-    val dsName = new File(bimboItemDS.getDSFile()).getName
+    val dsName = new File(allItemsDAO.itemsFile).getName
     val baseName = "target/kryo/" + dsName
     val productListFileName = baseName + "_productList.kryo"
     productListFileName
   }
 
   private def getProductItemsFileName(productId: Int): String = {
-    val dsName = new File(bimboItemDS.getDSFile()).getName
+    val dsName = new File(allItemsDAO.itemsFile).getName
     val baseName = "target/kryo/" + dsName
 
     baseName + "_productItems_%d.kryo".format(productId)

@@ -38,7 +38,7 @@ case class ClientProductGPModel(trainItemDAO: ItemDAO, avgLogWeeklySaleByClientD
 
       val gpModel = gpModelsByClientProduct.get(getKey(item))
       val logDemand = gpModel match {
-        case Some(gpModel) => {
+        case Some(gpModel)  => {
           val x = extractFeatureVec(item).toDenseMatrix
           val logDemand = dk.gp.gpr.predict(x, gpModel)(0, 0)
           logDemand
@@ -58,29 +58,31 @@ case class ClientProductGPModel(trainItemDAO: ItemDAO, avgLogWeeklySaleByClientD
     val x = extractFeatureVec(items)
     val y = DenseVector(items.map(i => log(i.demand + 1)).toArray)
 
-    //1240
-    //    val covFunc = RouteCovFunc()
-//     val covFuncParams = DenseVector(-1.14604754042564, 0.16010889770756165)
-//     val noiseLogStdDev = -0.897265
-    
-    //1240
-//     val covFunc = CovSEiso()
-//    val covFuncParams = DenseVector(-1.1506291436326108, 0.0)
-//    val noiseLogStdDev = -0.894726
-    
-    //2233
- //      val covFunc = CovSEiso()
- //   val covFuncParams = DenseVector(-1.0200623141474825, 0.0)
- //   val noiseLogStdDev = -1.002966
    
-      //2233
-//        val covFunc = RouteCovFunc()
-//     val covFuncParams = DenseVector(-1.0160164727548524, 0.27396607977155757)
-//     val noiseLogStdDev = -1.006402
+    
+    //trained 1240 + filter client
+//          val covFunc = RouteCovFunc()
+//     val covFuncParams = DenseVector(-1.1603273944500738, 0.45693524709189554, 1.9678936712400013, 0.6542646482212601)
+//     val noiseLogStdDev = -0.782495
+    
+    //trained 1240
+//           val covFunc = RouteCovFunc()
+//     val covFuncParams = DenseVector(-0.6987181874376821, -1.170222625034082E-4, -0.4449199487752958, -0.1924587820320028)
+//     val noiseLogStdDev = -0.897733
+     
+      //trained 1250
+//           val covFunc = RouteCovFunc()
+//     val covFuncParams = DenseVector(-0.6165706186823657, 1.9499459350198003E-5, -0.37210796899448567, -0.17365292616006683)
+//     val noiseLogStdDev = -0.879941
     
     val covFunc = CovSEiso()
     val covFuncParams = DenseVector(log(1), log(1))
     val noiseLogStdDev = log(1)
+
+    //train 1250
+//        val covFunc = CovSEiso()
+//    val covFuncParams = DenseVector(-0.999517464335511, 0.0)
+//    val noiseLogStdDev = -0.876163
     GprModel(x, y, covFunc, covFuncParams, noiseLogStdDev, mean = demandMean)
   }
 

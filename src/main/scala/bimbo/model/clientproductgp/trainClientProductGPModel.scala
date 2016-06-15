@@ -11,6 +11,8 @@ import com.typesafe.scalalogging.slf4j.LazyLogging
 import bimbo.model.clientproductgp.priordemand.calcProductMeanLogDemand
 import bimbo.model.clientproductgp.priordemand.PriorLogDemandModel
 import bimbo.data.dao.AvgLogWeeklySaleDAO
+import dk.gp.cov.CovSEiso
+import dk.gp.cov.CovSEiso
 
 object trainClientProductGPModel extends LazyLogging {
 
@@ -37,7 +39,7 @@ object trainClientProductGPModel extends LazyLogging {
     }.toList
     logger.info("Training data:" + mtgprData.size)
 
-    val covFunc = RouteCovFunc()
+    val covFunc = CovSEiso()
     val covFuncParams = DenseVector(log(1), log(1))
     val noiseLogStdDev = log(1)
     val mtGrpModel = MtGprModel(mtgprData, covFunc, covFuncParams, noiseLogStdDev)

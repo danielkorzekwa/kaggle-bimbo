@@ -1,16 +1,17 @@
 package bimbo
 
 import com.typesafe.scalalogging.slf4j.LazyLogging
-import bimbo.data.ds.KryoBimboItemDS
 import breeze.linalg._
 import dk.gp.util.csvwrite
 import bimbo.data.dao.ItemDAO
 import bimbo.model.groupbyfallback.GroupByFallbackModel
 import bimbo.model.clientproductgp.ClientProductGPModel
-import bimbo.data.ds.KryoBimboItemDS
-import bimbo.data.ds.CSVBimboItemDS
 import bimbo.data.dao.AvgLogWeeklySaleDAO
-import bimbo.data.ds.CSVBimboTestItemDS
+import bimbo.data.dao.allitems.AllTrainItemsDAO
+import bimbo.data.dao.ClientNamesDAO
+import bimbo.data.dao.allitems.AllTestItemsDAO
+import bimbo.data.dao.allitems.AllTestItemsDAO
+import bimbo.data.dao.ItemDAO
 
 object SubmissionApp extends LazyLogging {
 
@@ -30,33 +31,37 @@ object SubmissionApp extends LazyLogging {
 
   def predictDemand(): DenseVector[Double] = {
 
-    val trainItemsDS = CSVBimboItemDS("c:/perforce/daniel/bimbo/segments/train_3_to_8.csv")
-    val itemDAO = ItemDAO(trainItemsDS)
+    val clientNamesDAO = ClientNamesDAO("c:/perforce/daniel/bimbo/cliente_tabla.csv")
+    val allItemsDAO = AllTrainItemsDAO("c:/perforce/daniel/bimbo/segments/train_3_to_8.csv", clientNamesDAO)
+    val itemDAO = ItemDAO(allItemsDAO)
 
     val avgLogWeeklySaleByClientDAO = AvgLogWeeklySaleDAO("c:/perforce/daniel/bimbo/stats/clientAvgLogWeeklySale_3_8.csv")
 
     logger.info("Loading test set...")
-     val testItems = KryoBimboItemDS("c:/perforce/daniel/bimbo/segments/train_9.kryo").getAllItems().filter(i => i.productId == 2233)
+    val allTestItemsDAO = AllTrainItemsDAO("c:/perforce/daniel/bimbo/segments/train_9.csv", clientNamesDAO)
+     val testItems = ItemDAO(allTestItemsDAO).getProductItems(1242)//.filter(i => i.clientId==653378 && (i.routeId==3001 || i.routeId==3023))
+    //val testItems = AllTrainItemsDAO("c:/perforce/daniel/bimbo/segments/train_9.csv", clientNamesDAO).getAllItems()//.filter(i => i.productId == 1240)
 
     logger.info("Building model...")
     //  val model = GroupByFallbackModel( itemDAO)
     val model = ClientProductGPModel(itemDAO, avgLogWeeklySaleByClientDAO)
 
     logger.info("Predicting demand...")
-    val predictedDemand = model.predict(testItems)
+    val predictedDemand = model.predict(testItems)//.map(d => "%.0f".format(d).toDouble)
 
     predictedDemand
   }
-  
-   def predictDemandSubmission(): DenseVector[Double] = {
 
-    val trainItemsDS = CSVBimboItemDS("c:/perforce/daniel/bimbo/train.csv")
-    val itemDAO = ItemDAO(trainItemsDS)
+  def predictDemandSubmission(): DenseVector[Double] = {
+
+    val clientNamesDAO = ClientNamesDAO("c:/perforce/daniel/bimbo/segments/cliente_tabla.csv")
+    val allItemsDAO = AllTrainItemsDAO("c:/perforce/daniel/bimbo/train.csv", clientNamesDAO)
+    val itemDAO = ItemDAO(allItemsDAO)
 
     val avgLogWeeklySaleByClientDAO = AvgLogWeeklySaleDAO("c:/perforce/daniel/bimbo/stats/clientAvgLogWeeklySale_3_9.csv")
 
     logger.info("Loading test set...")
-    val testItems = CSVBimboTestItemDS("c:/perforce/daniel/bimbo/test.csv").getAllItems()
+    val testItems = AllTestItemsDAO("c:/perforce/daniel/bimbo/test.csv", clientNamesDAO).getAllItems()
 
     logger.info("Building model...")
     val model = ClientProductGPModel(itemDAO, avgLogWeeklySaleByClientDAO)

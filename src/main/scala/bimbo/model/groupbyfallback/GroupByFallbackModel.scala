@@ -23,15 +23,21 @@ case class GroupByFallbackModel(trainItemDAO: ItemDAO) extends DemandModel with 
       trainProductItems.map(i => log(i.demand + 1)).sum / trainProductItems.size
     }
 
+    
+    val clientNameProductStatCounter = StatCounterByKey(trainProductItems)(
+      getKey = item => (item.clientName, item.productId),
+      getValue = item => log(item.demand + 1),
+      getDefault = item => Some(StatCounter(productMeanLogDemand)))
+    
     val clientProductStatCounter = StatCounterByKey(trainProductItems)(
       getKey = item => (item.clientId, item.productId),
       getValue = item => log(item.demand + 1),
-      getDefault = item => Some(StatCounter(productMeanLogDemand)))
+      getDefault = item => Some(StatCounter(productMeanLogDemand))) //Some(clientNameProductStatCounter.getStatCounter(item)))//
 
-    //      val routeClientProductCounter = StatCounterByKey[Item, (Int, Int,Int)](trainProductItems)(
-    //      getKey = (item: Item) => (item.routeId,item.clientId, item.productId),
-    //      getValue = (item: Item) => log(item.demand + 1),
-    //      getDefault = (item: Item) => clientProductStatCounter.getStatCounter(item))
+          val routeClientProductCounter = StatCounterByKey[Item, (Int,Int, Int,Int)](trainProductItems)(
+          getKey = (item: Item) => (item.depotId,item.routeId,item.clientId, item.productId),
+          getValue = (item: Item) => log(item.demand + 1),
+          getDefault = (item: Item) => Some(clientProductStatCounter.getStatCounter(item)))
 
     val predictedProductDemand = productItems.map { item =>
       val logDemand = clientProductStatCounter.getStatCounter(item).mean

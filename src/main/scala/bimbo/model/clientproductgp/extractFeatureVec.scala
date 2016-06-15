@@ -7,7 +7,8 @@ import breeze.linalg.DenseMatrix
 object extractFeatureVec {
   
   def apply(item:Item):DenseVector[Double] = {
-    DenseVector(1d)
+   // DenseVector(item.depotId,item.routeId)
+     DenseVector(1d)
   }
   
   def apply(items:Seq[Item]):DenseMatrix[Double] = {
