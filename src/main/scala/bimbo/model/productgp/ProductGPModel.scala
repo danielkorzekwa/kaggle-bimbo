@@ -10,19 +10,23 @@ import breeze.linalg.DenseVector
 import dk.gp.cov.CovSEiso
 import bimbo.model.clientproductgp.priordemand.createSalesDemandData
 import dk.gp.gpr.gpr
+import dk.gp.util.loadObject
 
-case class ProductGPModel(trainItemDAO: ItemDAO, avgLogWeeklySaleDAO: AvgLogWeeklySaleDAO) extends DemandModel {
+case class ProductGPModel(trainItemDAO: ItemDAO, avgLogWeeklySaleDAO: AvgLogWeeklySaleDAO,
+    productGPModelParamsFile:String) extends DemandModel {
 
+  private val modelParamsByProductId = loadObject[Map[Int, (Array[Double], Double)]](productGPModelParamsFile)
+  
   def predictProductDemand(productId: Int, productItems: Seq[Item]): Seq[(Item, Double)] = {
 
     val trainProductItems = trainItemDAO.getProductItems(productId)
 
-    // val(x,y) =  createSalesDemandData(trainProductItems,avgLogWeeklySaleDAO)
 
     val x = extractFeatureVec(trainProductItems, avgLogWeeklySaleDAO)
     val y = DenseVector(trainProductItems.map(i => log(i.demand + 1)).toArray)
 
-    val gprModel = GprModel(x, y, ProductCovFunc(), DenseVector(1.167291637869937, 1.8658735934371884, -0.5014259853061713), -0.850194  )
+    val (covFuncParams,noiseLogStdDev) = modelParamsByProductId(productId)
+    val gprModel = GprModel(x, y, ProductCovFunc(), DenseVector(covFuncParams), noiseLogStdDev  )
 
     val predicted = productItems.map { item =>
 

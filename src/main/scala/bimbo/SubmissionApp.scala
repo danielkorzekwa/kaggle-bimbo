@@ -45,7 +45,7 @@ object SubmissionApp extends LazyLogging {
 
     logger.info("Building model...")
     //  val model = GroupByFallbackModel( itemDAO)
-    val model = ProductGPModel(itemDAO, avgLogWeeklySaleByClientDAO)
+    val model = ProductGPModel(itemDAO, avgLogWeeklySaleByClientDAO,"target/productGPModelParams.kryo")
 
     logger.info("Predicting demand...")
     val predictedDemand = model.predict(testItems)//.map(d => "%.0f".format(d).toDouble)
