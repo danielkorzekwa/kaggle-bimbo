@@ -16,6 +16,7 @@ import dk.gp.mtgpr.MtGprModel
 import bimbo.data.dao.allitems.AllTrainItemsDAO
 import bimbo.data.dao.ClientNamesDAO
 import bimbo.model.clientproductgp.RouteCovFunc
+import dk.gp.cov.CovSEiso
 
 object TrainClientProductPriorApp extends LazyLogging {
 
@@ -47,12 +48,12 @@ object TrainClientProductPriorApp extends LazyLogging {
   }
 
   def trainGrp() = {
-    val items = itemDAO.getProductItems(1240)
+    val items = itemDAO.getProductItems(35072)
     val (x, y) = createSalesDemandData(items, avgLogWeeklySaleByClientDAO)
 
     logger.info("Data size:" + x.rows)
 
-    val gprModel = gpr(x, y, RouteCovFunc(), DenseVector(log(1), log(1),log(1), log(1)), log(1))
+    val gprModel = gpr(x, y, CovSEiso(), DenseVector(log(1), log(1)),log(1))
     //  val gprModel = GprModel(x, y, CovSEiso(), DenseVector(log(1), log(1)), log(1))
     println("covFuncParams=%s, noiseLogStdDev=%f".format(gprModel.covFuncParams, gprModel.noiseLogStdDev))
 

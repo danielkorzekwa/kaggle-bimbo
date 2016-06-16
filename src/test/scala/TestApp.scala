@@ -17,9 +17,10 @@ object TestApp extends LazyLogging {
 
   def main(args: Array[String]): Unit = {
 
-    val noise = Gaussian(0, 10)
-    val x = DenseVector.rangeD(0, 200, 1)
+    val noise = Gaussian(0, 1)
+    val x = DenseVector.rangeD(1, 100, 0.5)
     val y = x.map(x => x + noise.draw())
+val yTest = x.map(x => x + noise.draw())
 
     val model = GprModel(x.toDenseMatrix.t, y, CovSEiso(), DenseVector(log(1), log(1)), log(1))
 
@@ -76,10 +77,10 @@ object TestApp extends LazyLogging {
     println(DenseMatrix.horzcat(x.toDenseMatrix.t, y.toDenseMatrix.t, predicted.toDenseMatrix.t, DenseMatrix(predicted2).t, DenseMatrix(predicted2Trained).t).toString(100, 100))
 
     val a = 0 
-    val b = 50
-    println("rmse1=" + rmse(log(x(a to b)+1.0), log(predicted(a to b)+1.0)))
-    println("rmse2=" + rmse(log(x(a to b)+1.0), log(DenseVector(predicted2)(a to b)+1.0)))
-    println("rmse2Trained=" + rmse(log(x(a to b)+1.0), log(DenseVector(predicted2Trained)(a to b)+1.0)))
+    val b = x.size-1
+    println("rmse1=" + rmse(log(yTest(a to b)+1.0), log(predicted(a to b)+1.0)))
+    println("rmse2=" + rmse(log(yTest(a to b)+1.0), log(DenseVector(predicted2)(a to b)+1.0)))
+    println("rmse2Trained=" + rmse(log(yTest(a to b)+1.0), log(DenseVector(predicted2Trained)(a to b)+1.0)))
   }
 
 }

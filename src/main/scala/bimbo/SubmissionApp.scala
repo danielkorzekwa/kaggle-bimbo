@@ -12,6 +12,7 @@ import bimbo.data.dao.ClientNamesDAO
 import bimbo.data.dao.allitems.AllTestItemsDAO
 import bimbo.data.dao.allitems.AllTestItemsDAO
 import bimbo.data.dao.ItemDAO
+import bimbo.model.productgp.ProductGPModel
 
 object SubmissionApp extends LazyLogging {
 
@@ -39,12 +40,12 @@ object SubmissionApp extends LazyLogging {
 
     logger.info("Loading test set...")
     val allTestItemsDAO = AllTrainItemsDAO("c:/perforce/daniel/bimbo/segments/train_9.csv", clientNamesDAO)
-     val testItems = ItemDAO(allTestItemsDAO).getProductItems(6469).filter(i => i.clientId==1334987)
+     val testItems = ItemDAO(allTestItemsDAO).getProductItems(35072)
     //val testItems = AllTrainItemsDAO("c:/perforce/daniel/bimbo/segments/train_9.csv", clientNamesDAO).getAllItems()//.filter(i => i.productId == 1240)
 
     logger.info("Building model...")
     //  val model = GroupByFallbackModel( itemDAO)
-    val model = ClientProductGPModel(itemDAO, avgLogWeeklySaleByClientDAO)
+    val model = ProductGPModel(itemDAO, avgLogWeeklySaleByClientDAO)
 
     logger.info("Predicting demand...")
     val predictedDemand = model.predict(testItems)//.map(d => "%.0f".format(d).toDouble)
