@@ -22,7 +22,7 @@ case class ProductGPModel(trainItemDAO: ItemDAO, avgLogWeeklySaleDAO: AvgLogWeek
     val x = extractFeatureVec(trainProductItems, avgLogWeeklySaleDAO)
     val y = DenseVector(trainProductItems.map(i => log(i.demand + 1)).toArray)
 
-    val gprModel = gpr(x, y, CovSEiso(), DenseVector(log(1), log(1)), log(1))
+    val gprModel = GprModel(x, y, ProductCovFunc(), DenseVector(1.167291637869937, 1.8658735934371884, -0.5014259853061713), -0.850194  )
 
     val predicted = productItems.map { item =>
 

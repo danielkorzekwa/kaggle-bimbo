@@ -8,7 +8,7 @@ import bimbo.data.dao.AvgLogWeeklySaleDAO
 object extractFeatureVec {
   
   def apply(item:Item,clientLogSale:Double):DenseVector[Double] = {
-  DenseVector(clientLogSale)
+  DenseVector(clientLogSale,item.clientId)
   }
   
   def apply(items:Seq[Item], avgLogWeeklySaleDAO: AvgLogWeeklySaleDAO):DenseMatrix[Double] = {

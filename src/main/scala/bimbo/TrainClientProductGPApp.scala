@@ -16,7 +16,7 @@ object TrainClientProductGPApp {
 
     val avgLogWeeklySaleByClientDAO = AvgLogWeeklySaleDAO("c:/perforce/daniel/bimbo/stats/clientAvgLogWeeklySale_3_8.csv")
 
-    val items = itemDAO.getProductItems(31198).filter(i => i.demand==0)
+    val items = itemDAO.getProductItems(40449).filter(i => i.demand==0)
 
     val (covFuncParams, noiseLogStdDev) = trainClientProductGPModel(items, avgLogWeeklySaleByClientDAO)
 
