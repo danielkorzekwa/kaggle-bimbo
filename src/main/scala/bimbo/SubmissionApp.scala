@@ -13,6 +13,9 @@ import bimbo.data.dao.allitems.AllTestItemsDAO
 import bimbo.data.dao.allitems.AllTestItemsDAO
 import bimbo.data.dao.ItemDAO
 import bimbo.model.productgp.ProductGPModel
+import bimbo.data.Item
+import bimbo.data.dao.ItemDAO
+import bimbo.data.dao.ItemDAO
 
 object SubmissionApp extends LazyLogging {
 
@@ -23,7 +26,7 @@ object SubmissionApp extends LazyLogging {
     val predictedDemand = predictDemand()
 
     logger.info("Saving submission...")
-    val idColumn = if(predictedDemand.size==1) DenseVector(0.0) else DenseVector.rangeD(0, predictedDemand.size, 1)
+    val idColumn = if (predictedDemand.size == 1) DenseVector(0.0) else DenseVector.rangeD(0, predictedDemand.size, 1)
     val predictionMat = DenseVector.horzcat(idColumn, predictedDemand)
     csvwrite("target/submission.csv", predictionMat, header = "id,Demanda_uni_equil")
 
@@ -34,23 +37,36 @@ object SubmissionApp extends LazyLogging {
 
     val clientNamesDAO = ClientNamesDAO("c:/perforce/daniel/bimbo/cliente_tabla.csv")
     val allItemsDAO = AllTrainItemsDAO("c:/perforce/daniel/bimbo/segments/train_3_to_8.csv", clientNamesDAO)
-    val itemDAO = ItemDAO(allItemsDAO)
+    val trainItemDAO = ItemDAO(allItemsDAO)
 
     val avgLogWeeklySaleByClientDAO = AvgLogWeeklySaleDAO("c:/perforce/daniel/bimbo/stats/clientAvgLogWeeklySale_3_8.csv")
 
     logger.info("Loading test set...")
     val allTestItemsDAO = AllTrainItemsDAO("c:/perforce/daniel/bimbo/segments/train_9.csv", clientNamesDAO)
-     val testItems = ItemDAO(allTestItemsDAO).getProductItems( 32295)
+    val itemByProductDAO = ItemDAO(allTestItemsDAO)   
+    val testItems = getTestItems(trainItemDAO,itemByProductDAO)
     //val testItems = AllTrainItemsDAO("c:/perforce/daniel/bimbo/segments/train_9.csv", clientNamesDAO).getAllItems()//.filter(i => i.productId == 1240)
 
     logger.info("Building model...")
     //  val model = GroupByFallbackModel( itemDAO)
-    val model = ProductGPModel(itemDAO, avgLogWeeklySaleByClientDAO,"target/productGPModelParams.kryo")
+   //  val model = ClientProductGPModel(trainItemDAO, avgLogWeeklySaleByClientDAO)
+    val model = ProductGPModel(trainItemDAO, avgLogWeeklySaleByClientDAO, "target/productGPModelParams.kryo")
 
     logger.info("Predicting demand...")
-    val predictedDemand = model.predict(testItems)//.map(d => "%.0f".format(d).toDouble)
+    val predictedDemand = model.predict(testItems) //.map(d => "%.0f".format(d).toDouble)
 
     predictedDemand
+  }
+
+  def getTestItems(trainItemDAO: ItemDAO,testItemDAO:ItemDAO): Seq[Item] = {
+    logger.info("Getting product ids for training...")
+    val productIds = trainItemDAO.getProductIds().filter { productId =>
+      val productSize = trainItemDAO.getProductItems(productId).size
+      productSize < 500 && productSize > 0
+    }
+    
+    val items = productIds.flatMap(productId => testItemDAO.getProductItems(productId))
+    items
   }
 
   def predictDemandSubmission(): DenseVector[Double] = {
