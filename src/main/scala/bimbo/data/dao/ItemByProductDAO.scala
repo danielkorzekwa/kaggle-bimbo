@@ -7,7 +7,7 @@ import bimbo.data.Item
 import com.typesafe.scalalogging.slf4j.LazyLogging
 import bimbo.data.dao.allitems.AllItemsDAO
 
-case class ItemDAO(allItemsDAO:AllItemsDAO) extends LazyLogging {
+case class ItemByProductDAO(allItemsDAO:AllItemsDAO) extends LazyLogging {
 
   init()
 

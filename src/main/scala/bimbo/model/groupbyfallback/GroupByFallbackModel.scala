@@ -3,7 +3,6 @@ package bimbo.model.groupbyfallback
 import scala.collection.Map
 import scala.collection.Seq
 import bimbo.data.Item
-import bimbo.data.dao.ItemDAO
 import bimbo.model.DemandModel
 import breeze.linalg.DenseVector
 import breeze.numerics._
@@ -12,8 +11,9 @@ import scala.collection._
 import java.util.concurrent.atomic.AtomicInteger
 import com.typesafe.scalalogging.slf4j.LazyLogging
 import bimbo.util.StatCounterByKey
+import bimbo.data.dao.ItemByProductDAO
 
-case class GroupByFallbackModel(trainItemDAO: ItemDAO) extends DemandModel with LazyLogging {
+case class GroupByFallbackModel(trainItemDAO: ItemByProductDAO) extends DemandModel with LazyLogging {
 
   def predictProductDemand(productId: Int, productItems: Seq[Item]): Seq[(Item, Double)] = {
 

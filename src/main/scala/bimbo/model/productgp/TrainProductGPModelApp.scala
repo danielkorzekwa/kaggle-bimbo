@@ -1,23 +1,23 @@
 package bimbo.model.productgp
 
-import bimbo.data.dao.ItemDAO
-import bimbo.data.dao.allitems.AllTrainItemsDAO
-import bimbo.data.dao.ClientNamesDAO
-import bimbo.data.dao.AvgLogWeeklySaleDAO
-import breeze.numerics._
-import breeze.linalg.DenseVector
-import dk.gp.gpr.gpr
-import dk.gp.cov.CovSEiso
-import com.typesafe.scalalogging.slf4j.LazyLogging
-import bimbo.data.dao.AvgLogWeeklySaleDAO
-import dk.gp.util.saveObject
 import java.util.concurrent.atomic.AtomicInteger
+
+import com.typesafe.scalalogging.slf4j.LazyLogging
+
+import bimbo.data.dao.AvgLogWeeklySaleDAO
+import bimbo.data.dao.ClientNamesDAO
+import bimbo.data.dao.ItemByProductDAO
+import bimbo.data.dao.allitems.AllTrainItemsDAO
+import breeze.linalg.DenseVector
+import breeze.numerics.log
+import dk.gp.gpr.gpr
+import dk.gp.util.saveObject
 
 object TrainProductGPModelApp extends LazyLogging {
 
   val clientNamesDAO = ClientNamesDAO("c:/perforce/daniel/bimbo/cliente_tabla.csv")
   val allItemsDAO = AllTrainItemsDAO("c:/perforce/daniel/bimbo/segments/train_3_to_8.csv", clientNamesDAO)
-  val itemDAO = ItemDAO(allItemsDAO)
+  val itemDAO = ItemByProductDAO(allItemsDAO)
 
   val avgLogWeeklySaleDAO = AvgLogWeeklySaleDAO("c:/perforce/daniel/bimbo/stats/clientAvgLogWeeklySale_3_8.csv")
 
@@ -39,7 +39,7 @@ object TrainProductGPModelApp extends LazyLogging {
 
   }
 
-  private def trainGprModel(productId: Int, itemDAO: ItemDAO, avgLogWeeklySaleDAO: AvgLogWeeklySaleDAO): (Array[Double], Double) = {
+  private def trainGprModel(productId: Int, itemDAO: ItemByProductDAO, avgLogWeeklySaleDAO: AvgLogWeeklySaleDAO): (Array[Double], Double) = {
     val items = itemDAO.getProductItems(productId)
 
     val x = extractFeatureVec(items, avgLogWeeklySaleDAO)

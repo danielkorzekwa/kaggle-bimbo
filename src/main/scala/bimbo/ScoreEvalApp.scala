@@ -5,7 +5,7 @@ import java.io.File
 import breeze.numerics._
 import dk.bayes.math.accuracy.rmse
 import com.typesafe.scalalogging.slf4j.LazyLogging
-import bimbo.data.dao.ItemDAO
+import bimbo.data.dao.ItemByProductDAO
 import bimbo.data.dao.allitems.AllTestItemsDAO
 import bimbo.data.dao.ClientNamesDAO
 import bimbo.data.dao.allitems.AllTrainItemsDAO
@@ -19,10 +19,10 @@ object ScoreEvalApp extends LazyLogging {
 
     val clientNamesDAO = ClientNamesDAO("c:/perforce/daniel/bimbo/cliente_tabla.csv")
     val allItemsDAO = AllTrainItemsDAO("c:/perforce/daniel/bimbo/segments/train_3_to_8.csv", clientNamesDAO)
-    val trainItemDAO = ItemDAO(allItemsDAO)
+    val trainItemDAO = ItemByProductDAO(allItemsDAO)
 
     val allTestItemsDAO = AllTrainItemsDAO("c:/perforce/daniel/bimbo/segments/train_9.csv", clientNamesDAO)
-    val testItemByProductDAO = ItemDAO(allTestItemsDAO)
+    val testItemByProductDAO = ItemByProductDAO(allTestItemsDAO)
 
     val testItems = getTestItems(trainItemDAO,testItemByProductDAO)
     //val testItems = AllTrainItemsDAO("c:/perforce/daniel/bimbo/segments/train_9.csv", clientNamesDAO).getAllItems() //.filter(i => i.productId == 1240)
@@ -36,7 +36,7 @@ object ScoreEvalApp extends LazyLogging {
     logger.info("rmse=%.5f".format(rmseValue))
   }
 
-  def getTestItems(trainItemDAO: ItemDAO,testItemDAO:ItemDAO): Seq[Item] = {
+  def getTestItems(trainItemDAO: ItemByProductDAO,testItemDAO:ItemByProductDAO): Seq[Item] = {
     logger.info("Getting product ids for training...")
     val productIds = trainItemDAO.getProductIds().filter { productId =>
       val productSize = trainItemDAO.getProductItems(productId).size
