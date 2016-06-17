@@ -40,8 +40,11 @@ object SubmissionApp extends LazyLogging {
 
     val avgLogWeeklySaleByClientDAO = AvgLogWeeklySaleDAO("c:/perforce/daniel/bimbo/stats/clientAvgLogWeeklySale_3_8.csv")
 
-    val itemSegmentDAO = ItemSegmentDAO()
-    val segmentGPParamsDAO = SegmentGPParamsDAO()
+    logger.info("Creating itemSegmentDAO")
+    val itemSegmentDAO = ItemSegmentDAO("target/productClientBySegment.kryo")
+    
+      logger.info("Creating segmentGPParamsDAO")
+    val segmentGPParamsDAO = SegmentGPParamsDAO("target/segmentGPModelParams.kryo")
     
     logger.info("Loading test set...")
     val allTestItemsDAO = AllTrainItemsDAO("c:/perforce/daniel/bimbo/segments/train_9.csv", clientNamesDAO)

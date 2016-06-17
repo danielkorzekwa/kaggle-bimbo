@@ -46,7 +46,7 @@ case class ProductGPModel(trainItemDAO: ItemByProductDAO, avgLogWeeklySaleDAO: A
 
     val predictedDemand = testSegmentItems.map { item =>
 
-      val clientLogSale = avgLogWeeklySaleDAO.getAvgLogWeeklySaleForClient(item.clientId).get //.getOrElse(5.54149)
+      val clientLogSale = avgLogWeeklySaleDAO.getAvgLogWeeklySaleForClient(item.clientId).getOrElse(5.54149)
       val x = extractFeatureVec(item, clientLogSale).toDenseMatrix
       val logDemand = dk.gp.gpr.predict(x, gprModel)(0, 0)
 

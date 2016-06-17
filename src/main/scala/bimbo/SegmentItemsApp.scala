@@ -10,7 +10,7 @@ import dk.gp.util.saveObject
 object SegmentItemsApp extends LazyLogging {
 
   val clientNamesDAO = ClientNamesDAO("c:/perforce/daniel/bimbo/segments/cliente_tabla.csv")
-  val allItemsDAO = AllTrainItemsDAO("c:/perforce/daniel/bimbo/train.csv", clientNamesDAO)
+  val allItemsDAO = AllTrainItemsDAO("c:/perforce/daniel/bimbo/segments/train_3_to_8.csv", clientNamesDAO)
   val itemByProductDAO = ItemByProductDAO(allItemsDAO)
 
   def main(args: Array[String]): Unit = {
