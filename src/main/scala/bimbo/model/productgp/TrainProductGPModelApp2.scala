@@ -12,6 +12,7 @@ import dk.gp.gpr.gpr
 import dk.gp.util.saveObject
 import bimbo.data.dao.ItemSegmentDAO
 import bimbo.data.Item
+import dk.gp.util.loadObject
 
 object TrainProductGPModelApp2 extends LazyLogging {
 
@@ -24,20 +25,38 @@ object TrainProductGPModelApp2 extends LazyLogging {
   logger.info("Creating itemSegmentDAO")
   val itemSegmentDAO = ItemSegmentDAO("target/productClientBySegment.kryo")
 
+  val modelParamsBySegmentId = loadObject[Map[Int, (Array[Double], Double)]]("target/segmentGPModelParams.kryo")
+
   def main(args: Array[String]): Unit = {
 
     logger.info("Getting product ids for training...")
-    val productIds = itemDAO.getProductIds().filter(productId => itemDAO.getProductItems(productId).size < 500)
+    val productIds = List(40930) //itemDAO.getProductIds().filter(productId => itemDAO.getProductItems(productId).size < 500)
     val trainItems = productIds.flatMap(productId => itemDAO.getProductItems(productId))
     val segmentIds = productIds.flatMap(productId => itemDAO.getProductItems(productId).map(item => itemSegmentDAO.getSegment(item))).distinct
-
     val i = new AtomicInteger(1)
     val gprParamsBySegmentId: Map[Int, (Array[Double], Double)] = segmentIds.par.map {
       segmentId =>
 
-        logger.info("Training model %d/%d".format(i.getAndIncrement, segmentIds.size))
-        val (trainedCovParams, trainedNoiseLogStdDev) = trainGprModel(segmentId, trainItems, itemDAO, avgLogWeeklySaleDAO)
-        segmentId -> (trainedCovParams, trainedNoiseLogStdDev)
+        val trainedModelParams = modelParamsBySegmentId.get(segmentId) match {
+          case Some(modelParams) => modelParams
+          case None => {
+
+            logger.info("Training model %d/%d,segmentId=%d".format(i.getAndIncrement, segmentIds.size, segmentId))
+            val (trainedCovParams, trainedNoiseLogStdDev) = try {
+              trainGprModel(segmentId, trainItems, itemDAO, avgLogWeeklySaleDAO)
+            } catch {
+              case e: Exception => {
+                logger.info("Training model for segment %d failed".format(segmentId))
+                throw e
+              }
+            }
+
+            (trainedCovParams, trainedNoiseLogStdDev)
+
+          }
+        }
+
+        segmentId -> trainedModelParams
     }.toList.toMap
 
     saveObject(gprParamsBySegmentId, "target/segmentGPModelParams.kryo")
