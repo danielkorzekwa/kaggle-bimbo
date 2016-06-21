@@ -1,3 +1,9 @@
+gp linked (pg and g):
+rmse=0.46477 
+
+gp linked(pg): 
+rmse=0.46448 
+
 gp (client,product), all data, gp prior(client sale), contant mean prior
 rmse=0.46701 
 
