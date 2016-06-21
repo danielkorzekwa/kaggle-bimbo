@@ -23,8 +23,8 @@ case class PriorLogDemandModel(items: Seq[Item], avgLogWeeklySaleDAO: AvgLogWeek
 
   lazy val gprModel = {
     val (x, y) = createSalesDemandData(items, avgLogWeeklySaleDAO)
-    GprModel(x, y, CovSEiso(), DenseVector(log(1), log(1)), log(1))
-   //  GprModel(x, y, CovSEiso(), DenseVector(0.919527996112137, 1.0879682408498927), -0.874610)
+  //  GprModel(x, y, CovSEiso(), DenseVector(log(1), log(1)), log(1))
+     GprModel(x, y, CovSEiso(), DenseVector(0.777612977470599, 0.6221529761819105),-1.391158)
   }
 
   def predictLogDemand(item: Item): Double = {
