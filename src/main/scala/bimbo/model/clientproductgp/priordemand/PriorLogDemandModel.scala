@@ -40,7 +40,11 @@ case class PriorLogDemandModel(items: Seq[Item], avgLogWeeklySaleDAO: AvgLogWeek
 
   def predictLogDemand(item: Item): Double = {
 
-    val priorLogDemand2 = avgLogWeeklySaleDAO.getAvgLogWeeklySaleForClient(item.clientId) match {
+    predictLogDemand(item.clientId)
+  }
+  
+  def predictLogDemand(clientId:Int): Double = {
+       val priorLogDemand2 = avgLogWeeklySaleDAO.getAvgLogWeeklySaleForClient(clientId) match {
       case Some(avgLogWeeklySale) if (itemsSize > 0) => predict(DenseMatrix(avgLogWeeklySale), gprModel)(0, 0)
       case _                                         => priorLogDemand
 

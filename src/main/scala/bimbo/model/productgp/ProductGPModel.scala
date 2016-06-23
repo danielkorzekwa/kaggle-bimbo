@@ -22,8 +22,8 @@ case class ProductGPModel(trainItemDAO: ItemByProductDAO, avgLogWeeklySaleDAO: A
   def predictProductDemand(productId: Int, testProductItems: Seq[Item]): Seq[(Item, Double)] = {
 
     val trainProductItems = trainItemDAO.getProductItems(productId)
+    
     val trainProductItemsBySegment: Map[Int, Seq[(Int, Item)]] = trainProductItems.map(item => (itemSegmentDAO.getSegment(item), item)).groupBy(_._1)
-
     val testProductItemsBySegment: Map[Int, Seq[(Int, Item)]] = testProductItems.map(item => (itemSegmentDAO.getSegment(item), item)).groupBy(_._1)
 
     val predictedDemand = testProductItemsBySegment.toList.flatMap {
@@ -43,10 +43,9 @@ case class ProductGPModel(trainItemDAO: ItemByProductDAO, avgLogWeeklySaleDAO: A
     val y = DenseVector(trainSegmentItems.map(i => log(i.demand + 1)).toArray)
 
     val (covFuncParams, noiseLogStdDev) = segmentGPParamsDAO.getSegmentGPParams(segmentId)
-
     val gprModel = GprModel(x, y, ProductCovFunc(), covFuncParams, noiseLogStdDev, mean(y))
 
-    val predictedDemand = testSegmentItems.map { item =>
+    val predictedDemand = testSegmentItems.par.map { item =>
 
       val clientLogSale = avgLogWeeklySaleDAO.getAvgLogWeeklySaleForClient(item.clientId).getOrElse(5.54149)
       val x = extractFeatureVec(item, clientLogSale).toDenseMatrix
@@ -54,7 +53,7 @@ case class ProductGPModel(trainItemDAO: ItemByProductDAO, avgLogWeeklySaleDAO: A
 
       val demand = exp(logDemand) - 1
       item -> demand
-    }
+    }.toList
     predictedDemand
   }
 
