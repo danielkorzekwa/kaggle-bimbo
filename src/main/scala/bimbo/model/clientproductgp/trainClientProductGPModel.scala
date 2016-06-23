@@ -13,19 +13,20 @@ import bimbo.model.clientproductgp.priordemand.PriorLogDemandModel
 import bimbo.data.dao.AvgLogWeeklySaleDAO
 import dk.gp.cov.CovSEiso
 import dk.gp.cov.CovSEiso
+import bimbo.data.dao.AvgLogDemandByClientDAO
 
 object trainClientProductGPModel extends LazyLogging {
 
   /**
    * @return (covFuncParams,noiseLogStdDev)
    */
-  def apply(productItems: Seq[Item], avgLogWeeklySaleByClientDAO: AvgLogWeeklySaleDAO): (DenseVector[Double], Double) = {
+  def apply(productItems: Seq[Item], avgLogWeeklySaleByClientDAO: AvgLogWeeklySaleDAO,avgLogDemandDAO:AvgLogDemandByClientDAO): (DenseVector[Double], Double) = {
 
     logger.info("Number of items:" + productItems.size)
     
     val productItemsByClient = productItems.groupBy { i => getKey(i) }.filter{case (key,items) => items.size > 0 && items.size<1000}
     
-     val priorDemandModel = PriorLogDemandModel(productItems, avgLogWeeklySaleByClientDAO)
+     val priorDemandModel = PriorLogDemandModel(productItems, avgLogWeeklySaleByClientDAO,avgLogDemandDAO)
      
     val mtgprData = productItemsByClient.map {
       case ((clientId, productId), clientProductItems) =>

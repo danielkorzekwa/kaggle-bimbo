@@ -1,3 +1,10 @@
+gp (client,product), all data, gp prior(client sale) - SUBMISSION 22/06
+rmse=0.47318
+
+---------------------------------------------
+^^^^^^^ int predictions
+---------------------------------------------
+
 gp linked (pg and g):
 rmse=0.46477 
 

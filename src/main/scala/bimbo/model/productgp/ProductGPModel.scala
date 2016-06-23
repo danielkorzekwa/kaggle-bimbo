@@ -19,7 +19,6 @@ import breeze.stats._
 case class ProductGPModel(trainItemDAO: ItemByProductDAO, avgLogWeeklySaleDAO: AvgLogWeeklySaleDAO,
                           productGPModelParamsFile: String, itemSegmentDAO: ItemSegmentDAO, segmentGPParamsDAO: SegmentGPParamsDAO) extends DemandModel {
 
-
   def predictProductDemand(productId: Int, testProductItems: Seq[Item]): Seq[(Item, Double)] = {
 
     val trainProductItems = trainItemDAO.getProductItems(productId)
@@ -40,13 +39,12 @@ case class ProductGPModel(trainItemDAO: ItemByProductDAO, avgLogWeeklySaleDAO: A
   private def predictSegmentDemand(segmentId: Int, trainSegmentItems: Seq[Item], testSegmentItems: Seq[Item]): Seq[(Item, Double)] = {
 
     val x = extractFeatureVec(trainSegmentItems, avgLogWeeklySaleDAO)
-   println( x(::,0).toArray.distinct.size + ":" +  x(::,0).toArray.toList.sorted)
-   
+
     val y = DenseVector(trainSegmentItems.map(i => log(i.demand + 1)).toArray)
 
     val (covFuncParams, noiseLogStdDev) = segmentGPParamsDAO.getSegmentGPParams(segmentId)
 
-    val gprModel = GprModel(x, y, ProductCovFunc(), covFuncParams, noiseLogStdDev,mean(y))
+    val gprModel = GprModel(x, y, ProductCovFunc(), covFuncParams, noiseLogStdDev, mean(y))
 
     val predictedDemand = testSegmentItems.map { item =>
 

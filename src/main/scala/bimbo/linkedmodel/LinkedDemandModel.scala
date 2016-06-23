@@ -17,7 +17,6 @@ import bimbo.data.PgProductDetails
 import bimbo.data.PgProductDetails
 import bimbo.data.dao.ItemByPgProductDAO
 import bimbo.data.dao.AvgLogWeeklySaleDAO
-import bimbo.model2.client.ClientModel
 import bimbo.linkedmodel.client.ClientModel2
 import com.typesafe.scalalogging.slf4j.LazyLogging
 import java.util.concurrent.atomic.AtomicInteger
@@ -70,7 +69,7 @@ abstract class LinkedDemandModel(productMap: Map[Int, ProductDetails], trainItem
     val predictedDemand = testItemsByProduct.toList.par.flatMap {
       case (productId, productItems) =>
         if (i.getAndIncrement % 10 == 0) logger.info("Predicting product %d/%d".format(i.get, testItemsByProduct.size))
-        ClientProductGPModel(trainItemDAO, avgLogWeeklySaleByClientDAO)predictProductDemand(productId, productItems)
+        ClientProductGPModel(trainItemDAO, avgLogWeeklySaleByClientDAO,null)predictProductDemand(productId, productItems)
     }.toList
 
     predictedDemand

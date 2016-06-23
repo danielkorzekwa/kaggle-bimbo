@@ -16,7 +16,6 @@ object createSalesDemandData {
       val demand = log(item.demand + 1)
       (logSale, demand)
     }
-
     val demandByLogWeeklySaleStatCounter = StatCounterByKey(xy)(
       getKey = item => item._1,
       getValue = item => item._2,

@@ -18,15 +18,17 @@ import bimbo.model.clientproductgp.priordemand.PriorLogDemandModel
 import bimbo.data.dao.AvgLogWeeklySaleDAO
 import dk.gp.cov.CovSEiso
 import bimbo.data.dao.ItemByProductDAO
+import bimbo.data.dao.AvgLogDemandByClientDAO
 
-case class ClientProductGPModel(trainItemDAO: ItemByProductDAO, avgLogWeeklySaleByClientDAO: AvgLogWeeklySaleDAO)
+case class ClientProductGPModel(trainItemDAO: ItemByProductDAO, avgLogWeeklySaleByClientDAO: AvgLogWeeklySaleDAO,
+    avgLogDemandDAO:AvgLogDemandByClientDAO)
     extends DemandModel with LazyLogging {
 
   def predictProductDemand(productId: Int, productItems: Seq[Item]): Seq[(Item, Double)] = {
 
     val trainProductItems = trainItemDAO.getProductItems(productId)
 
-    val priorDemandModel = PriorLogDemandModel(trainProductItems, avgLogWeeklySaleByClientDAO)
+    val priorDemandModel = PriorLogDemandModel(trainProductItems, avgLogWeeklySaleByClientDAO,avgLogDemandDAO)
 
     val gpModelsByClientProduct = trainProductItems.groupBy { i => getKey(i) }.map {
       case ((clientId, productId), clientProductItems) =>
@@ -36,18 +38,21 @@ case class ClientProductGPModel(trainItemDAO: ItemByProductDAO, avgLogWeeklySale
     }
     val predictedProductDemand = productItems.map { item =>
 
+     
       val gpModel = gpModelsByClientProduct.get(getKey(item))
       val logDemand = gpModel match {
         case Some(gpModel)  => {
+          
           val x = extractFeatureVec(item).toDenseMatrix
           val logDemand = dk.gp.gpr.predict(x, gpModel)(0, 0)
+         
           logDemand
         }
         case _ => priorDemandModel.predictLogDemand(item)
       }
 
       val demand = exp(logDemand) - 1
-
+ 
       (item, demand)
     }
 
@@ -62,14 +67,14 @@ case class ClientProductGPModel(trainItemDAO: ItemByProductDAO, avgLogWeeklySale
     
 
     
-//    val covFunc = CovSEiso()
-//    val covFuncParams = DenseVector(log(1), log(1))
-//    val noiseLogStdDev = log(1)
+    val covFunc = CovSEiso()
+    val covFuncParams = DenseVector(log(1), log(1))
+    val noiseLogStdDev = log(1)
 
     //train 
-        val covFunc = CovSEiso()
-    val covFuncParams = DenseVector(-1.5659136180331088, 0.0)
-    val noiseLogStdDev = -0.619037
+//        val covFunc = CovSEiso()
+//    val covFuncParams = DenseVector(-1.5659136180331088, 0.0)
+//    val noiseLogStdDev = -0.619037
     GprModel(x, y, covFunc, covFuncParams, noiseLogStdDev, mean = demandMean)
   }
 

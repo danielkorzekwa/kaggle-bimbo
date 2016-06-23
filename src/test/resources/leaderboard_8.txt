@@ -1,2 +1,5 @@
 gp (client,product), all data, gp prior(client sale) - 1306 - SUBMISSION
-rmse=0.46619
+rmse=0.51706 
+
+gp(log avg demand)
+rmse=0.53775 

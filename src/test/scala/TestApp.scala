@@ -1,86 +1,42 @@
 
 
+import com.typesafe.scalalogging.slf4j.LazyLogging
 import breeze.linalg.DenseVector
-import dk.bayes.math.gaussian.Gaussian
-import dk.gp.gpr.GprModel
 import dk.gp.cov.CovSEiso
+import dk.gp.math.sqDist
+import bimbo.data.dao.ClientNamesDAO
+import bimbo.data.dao.allitems.AllTrainItemsDAO
+import bimbo.data.dao.ItemByProductDAO
+import bimbo.data.dao.AvgLogWeeklySaleDAO
+import breeze.linalg._
 import breeze.numerics._
 import dk.gp.gpr.gpr
 import dk.gp.gpr.predict
-import breeze.linalg.DenseMatrix
-import dk.bayes.math.accuracy.rmse
-import dk.gp.mtgpr.mtgprTrain
-import dk.gp.mtgpr.MtGprModel
-import com.typesafe.scalalogging.slf4j.LazyLogging
-
+import bimbo.data.dao.AvgLogDemandByClientDAO
 object TestApp extends LazyLogging {
 
   def main(args: Array[String]): Unit = {
 
-    val noise = Gaussian(0, 1)
-    val x = DenseVector.rangeD(1, 100, 0.5)
-    val y = x.map(x => x + noise.draw())
-val yTest = x.map(x => x + noise.draw())
+     val clientNamesDAO = ClientNamesDAO("c:/perforce/daniel/bimbo/cliente_tabla.csv")
+    val allItemsDAO = AllTrainItemsDAO("c:/perforce/daniel/bimbo/segments/train_8.csv", clientNamesDAO)
+    val itemDAO = ItemByProductDAO(allItemsDAO)
 
-    val model = GprModel(x.toDenseMatrix.t, y, CovSEiso(), DenseVector(log(1), log(1)), log(1))
+  val avgLogWeeklySaleByClientDAO = AvgLogWeeklySaleDAO("c:/perforce/daniel/bimbo/stats/clientAvgLogWeeklySale_8.csv")
+  val avgLogDemandDAO = AvgLogDemandByClientDAO("c:/perforce/daniel/bimbo/stats/avgLogDemandByClient_8.csv")
+   val items = itemDAO.getProductItems(46232)
+   val x =  DenseMatrix(items.map(item => avgLogDemandDAO.getAvgLogDemand(item.clientId).get).toArray).t
+  val y = DenseVector(items.map(item => log(item.demand+1)).toArray)
 
-    val trainedModel = gpr(x.toDenseMatrix.t, y, CovSEiso(), DenseVector(log(1), log(1)), log(1))
 
-    val predicted = predict(x.toDenseMatrix.t, trainedModel)(::, 0)
+    val gprModel = gpr(x, y, CovSEiso(), DenseVector(log(1), log(1)),log(1))
+    //  val gprModel = GprModel(x, y, CovSEiso(), DenseVector(log(1), log(1)), log(1))
+    println("covFuncParams=%s, noiseLogStdDev=%f".format(gprModel.covFuncParams, gprModel.noiseLogStdDev))
 
-    /**
-     * Train mtgpr
-     */
-    logger.info("Training mtgpr...")
-    val trainData = (0 until x.size).map { i =>
-      val mean = predicted(i)
+    val xTest = DenseVector.rangeD(0, 17, 1).toDenseMatrix.t
+    val predicted = exp(predict(xTest, gprModel)(::, 0)) - 1.0
 
-      val xPoint = DenseMatrix(x(i))
-      val yPoint = DenseVector(y(i)) - mean
-
-      DenseMatrix.horzcat(xPoint, yPoint.toDenseMatrix.t)
-    }
-
-    val covFunc = CovSEiso()
-    val covFuncParams = DenseVector(log(1), log(1))
-    val noiseLogStdDev = log(1)
-    val mtGrpModel = MtGprModel(trainData, covFunc, covFuncParams, noiseLogStdDev)
-    val trainedMtGrpModel = mtgprTrain(mtGrpModel)
-
-    val predicted2 = (0 until x.size).map { i =>
-      val xPoint = DenseMatrix(x(i))
-      val yPoint = DenseVector(y(i))
-      val mean = predicted(i)
-      val covFunc = CovSEiso()
-      val covFuncParams = DenseVector(log(1), log(1))
-      val noiseLogStdDev = log(1)
-
-      val model = GprModel(xPoint, yPoint, covFunc, covFuncParams, noiseLogStdDev, mean)
-      val predictedPoint = predict(xPoint, model)(0, 0)
-      predictedPoint
-    }.toArray
-
-    val predicted2Trained = (0 until x.size).map { i =>
-      val xPoint = DenseMatrix(x(i))
-      val yPoint = DenseVector(y(i))
-      val mean = predicted(i)
-      val covFunc = CovSEiso()
-
-      val covFuncParams = trainedMtGrpModel.covFuncParams
-      val noiseLogStdDev = trainedMtGrpModel.likNoiseLogStdDev
-
-      val model = GprModel(xPoint, yPoint, covFunc, covFuncParams, noiseLogStdDev, mean)
-      val predictedPoint = predict(xPoint, model)(0, 0)
-      predictedPoint
-    }.toArray
-
-    println(DenseMatrix.horzcat(x.toDenseMatrix.t, y.toDenseMatrix.t, predicted.toDenseMatrix.t, DenseMatrix(predicted2).t, DenseMatrix(predicted2Trained).t).toString(100, 100))
-
-    val a = 0 
-    val b = x.size-1
-    println("rmse1=" + rmse(log(yTest(a to b)+1.0), log(predicted(a to b)+1.0)))
-    println("rmse2=" + rmse(log(yTest(a to b)+1.0), log(DenseVector(predicted2)(a to b)+1.0)))
-    println("rmse2Trained=" + rmse(log(yTest(a to b)+1.0), log(DenseVector(predicted2Trained)(a to b)+1.0)))
+    println(DenseMatrix.horzcat(xTest, predicted.toDenseMatrix.t))
+  
   }
 
 }

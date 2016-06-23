@@ -13,7 +13,7 @@ case class ClientModel2(avgLogWeeklySaleByClientDAO: AvgLogWeeklySaleDAO) {
 
   def predictDemand(trainItems: Seq[Item], testItems: Seq[Item]): Seq[(Item, Double)] = {
 
-    val priorDemandModel = PriorLogDemandModel(trainItems, avgLogWeeklySaleByClientDAO)
+    val priorDemandModel = PriorLogDemandModel(trainItems, avgLogWeeklySaleByClientDAO,null)
 
     val gpModelsByClient = trainItems.groupBy { i => i.clientId }.map {
       case (clientId, clientItems) =>

@@ -18,7 +18,7 @@ object TrainClientProductGPApp {
 
     val items = itemDAO.getProductItems(43285)
 
-    val (covFuncParams, noiseLogStdDev) = trainClientProductGPModel(items, avgLogWeeklySaleByClientDAO)
+    val (covFuncParams, noiseLogStdDev) = trainClientProductGPModel(items, avgLogWeeklySaleByClientDAO,null)
 
     println("covFuncParams=%s, noiseLogStdDev=%f".format(covFuncParams, noiseLogStdDev))
 

@@ -18,14 +18,14 @@ object ScoreEvalApp extends LazyLogging {
     logger.info("Compute rmse...")
 
     val clientNamesDAO = ClientNamesDAO("c:/perforce/daniel/bimbo/cliente_tabla.csv")
-    val allItemsDAO = AllTrainItemsDAO("c:/perforce/daniel/bimbo/segments/train_3_to_8.csv", clientNamesDAO)
+    val allItemsDAO = AllTrainItemsDAO("c:/perforce/daniel/bimbo/segments/train_8.csv", clientNamesDAO)
     val trainItemDAO = ItemByProductDAO(allItemsDAO)
 
     val allTestItemsDAO = AllTrainItemsDAO("c:/perforce/daniel/bimbo/segments/train_9.csv", clientNamesDAO)
     val testItemByProductDAO = ItemByProductDAO(allTestItemsDAO)
 
-    val testItems = testItemByProductDAO.getProductItems(43285)
-   //   val testItems = allTestItemsDAO.getAllItems()
+    val testItems = getTestItems(trainItemDAO, testItemByProductDAO) //testItemByProductDAO.getProductItems(43175)////
+    //    val testItems = allTestItemsDAO.getAllItems()
 
     val predictionData = csvread(new File("target/submission.csv"), skipLines = 1)
 
@@ -36,13 +36,13 @@ object ScoreEvalApp extends LazyLogging {
     logger.info("rmse=%.5f".format(rmseValue))
   }
 
-  def getTestItems(trainItemDAO: ItemByProductDAO,testItemDAO:ItemByProductDAO): Seq[Item] = {
+  def getTestItems(trainItemDAO: ItemByProductDAO, testItemDAO: ItemByProductDAO): Seq[Item] = {
     logger.info("Getting product ids for training...")
     val productIds = trainItemDAO.getProductIds().filter { productId =>
       val productSize = trainItemDAO.getProductItems(productId).size
       productSize < 500 && productSize > 0
     }
-    
+
     val items = productIds.flatMap(productId => testItemDAO.getProductItems(productId))
     items
   }
