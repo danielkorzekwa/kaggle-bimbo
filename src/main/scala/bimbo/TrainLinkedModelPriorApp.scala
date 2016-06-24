@@ -8,7 +8,6 @@ import dk.gp.cov.CovSEiso
 import breeze.numerics._
 import dk.gp.gpr.gpr
 import com.typesafe.scalalogging.slf4j.LazyLogging
-import dk.gp.gpr.predict
 import breeze.linalg.DenseMatrix
 import dk.gp.mtgpr.mtgprTrain
 import dk.gp.mtgpr.MtGprModel
@@ -20,6 +19,7 @@ import bimbo.data.dao.ItemByProductDAO
 import bimbo.data.dao.ItemByPgProductDAO
 import bimbo.data.dao.ProductDAO
 import bimbo.data.PgProductDetails
+import dk.gp.gpr.gprPredict
 
 object TrainLinkedModelPriorApp extends LazyLogging {
 
@@ -50,7 +50,7 @@ object TrainLinkedModelPriorApp extends LazyLogging {
     println("covFuncParams=%s, noiseLogStdDev=%f".format(gprModel.covFuncParams, gprModel.noiseLogStdDev))
 
     val xTest = DenseVector.rangeD(0, 17, 1).toDenseMatrix.t
-    val predicted = exp(predict(xTest, gprModel)(::, 0)) - 1.0
+    val predicted = exp(gprPredict(xTest, gprModel)(::, 0)) - 1.0
 
     println(DenseMatrix.horzcat(xTest, predicted.toDenseMatrix.t))
   }

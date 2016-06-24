@@ -13,6 +13,7 @@ import bimbo.model.clientproductgp.priordemand.PriorLogDemandModel
 import bimbo.model.clientproductgp.priordemand.PriorLogDemandModel
 import breeze.linalg.DenseMatrix
 import breeze.linalg._
+import dk.gp.gpr.gprPredict
 
 case class DepotProductModel(trainItemDAO: ItemByProductDAO, avgLogWeeklySaleDAO: AvgLogWeeklySaleDAO) extends DemandModel {
 def getKey(item:Item) = item.depotId
@@ -39,7 +40,7 @@ def getKey(item:Item) = item.depotId
 
           val clientLogSale = avgLogWeeklySaleDAO.getAvgLogWeeklySaleForClient(item.clientId).getOrElse(5.54149)
           val x = extractFeatureVec(item, clientLogSale).toDenseMatrix
-          val logDemand = dk.gp.gpr.predict(x, gpModel)(0, 0)
+          val logDemand = gprPredict(x, gpModel)(0, 0)
 
           logDemand
         }

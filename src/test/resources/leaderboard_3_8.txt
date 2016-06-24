@@ -1,3 +1,6 @@
+depot client (100):
+rmse=0.46929 
+
 gp (client,product), all data, gp prior(client sale) - SUBMISSION 22/06
 rmse=0.47318
 

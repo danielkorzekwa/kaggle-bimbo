@@ -15,6 +15,7 @@ import bimbo.data.dao.SegmentGPParamsDAO
 import bimbo.data.dao.ItemByProductDAO
 import java.util.concurrent.atomic.AtomicInteger
 import breeze.stats._
+import dk.gp.gpr.gprPredict
 
 case class ProductGPModel(trainItemDAO: ItemByProductDAO, avgLogWeeklySaleDAO: AvgLogWeeklySaleDAO,
                           productGPModelParamsFile: String, itemSegmentDAO: ItemSegmentDAO, segmentGPParamsDAO: SegmentGPParamsDAO) extends DemandModel {
@@ -49,7 +50,7 @@ case class ProductGPModel(trainItemDAO: ItemByProductDAO, avgLogWeeklySaleDAO: A
 
       val clientLogSale = avgLogWeeklySaleDAO.getAvgLogWeeklySaleForClient(item.clientId).getOrElse(5.54149)
       val x = extractFeatureVec(item, clientLogSale).toDenseMatrix
-      val logDemand = dk.gp.gpr.predict(x, gprModel)(0, 0)
+      val logDemand =gprPredict(x, gprModel)(0, 0)
 
       val demand = exp(logDemand) - 1
       item -> demand

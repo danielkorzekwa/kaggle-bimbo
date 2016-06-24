@@ -6,7 +6,7 @@ import breeze.linalg._
 import breeze.numerics._
 import dk.gp.gpr.GprModel
 import dk.gp.cov.CovSEiso
-import dk.gp.gpr.predict
+import dk.gp.gpr.gprPredict
 import bimbo.data.dao.AvgLogWeeklySaleDAO
 import bimbo.util.StatCounterByKey
 import breeze.stats._
@@ -45,7 +45,7 @@ case class PriorLogDemandModel(items: Seq[Item], avgLogWeeklySaleDAO: AvgLogWeek
   
   def predictLogDemand(clientId:Int): Double = {
        val priorLogDemand2 = avgLogWeeklySaleDAO.getAvgLogWeeklySaleForClient(clientId) match {
-      case Some(avgLogWeeklySale) if (itemsSize > 0) => predict(DenseMatrix(avgLogWeeklySale), gprModel)(0, 0)
+      case Some(avgLogWeeklySale) if (itemsSize > 0) => gprPredict(DenseMatrix(avgLogWeeklySale), gprModel)(0, 0)
       case _                                         => priorLogDemand
 
     }

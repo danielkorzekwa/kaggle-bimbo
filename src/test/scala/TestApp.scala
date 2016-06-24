@@ -11,8 +11,8 @@ import bimbo.data.dao.AvgLogWeeklySaleDAO
 import breeze.linalg._
 import breeze.numerics._
 import dk.gp.gpr.gpr
-import dk.gp.gpr.predict
 import bimbo.data.dao.AvgLogDemandByClientDAO
+import dk.gp.gpr.gprPredict
 object TestApp extends LazyLogging {
 
   def main(args: Array[String]): Unit = {
@@ -33,7 +33,7 @@ object TestApp extends LazyLogging {
     println("covFuncParams=%s, noiseLogStdDev=%f".format(gprModel.covFuncParams, gprModel.noiseLogStdDev))
 
     val xTest = DenseVector.rangeD(0, 17, 1).toDenseMatrix.t
-    val predicted = exp(predict(xTest, gprModel)(::, 0)) - 1.0
+    val predicted = exp(gprPredict(xTest, gprModel)(::, 0)) - 1.0
 
     println(DenseMatrix.horzcat(xTest, predicted.toDenseMatrix.t))
   

@@ -12,6 +12,8 @@ import breeze.linalg._
 import breeze.stats._
 import dk.gp.gpr.GprModel
 import com.typesafe.scalalogging.slf4j.LazyLogging
+import dk.gp.gpr.gprPredict
+import dk.gp.gpr.gprPredictMean
 
 case class SegmentProductModel(trainItemDAO: ItemByProductDAO, avgLogWeeklySaleDAO: AvgLogWeeklySaleDAO) extends DemandModel with LazyLogging {
 
@@ -45,7 +47,15 @@ case class SegmentProductModel(trainItemDAO: ItemByProductDAO, avgLogWeeklySaleD
 
             val clientLogSale = avgLogWeeklySaleDAO.getAvgLogWeeklySaleForClient(item.clientId).getOrElse(5.54149)
             val x = extractFeatureVec(item, clientLogSale).toDenseMatrix
-            val logDemand = dk.gp.gpr.predict(x, gpModel)(0, 0)
+            val logDemand = try {
+             gprPredictMean(x, gpModel)(0)
+            } catch {
+              case e: Exception => {
+                println(item)
+                println(x)
+                throw e
+              }
+            }
 
             logDemand
           }
@@ -79,6 +89,20 @@ case class SegmentProductModel(trainItemDAO: ItemByProductDAO, avgLogWeeklySaleD
       }
       meanVec
     }
-    new GprModel(x, y, covFunc, covFuncParams, noiseLogStdDev, meanFunc)
+
+    var model: GprModel = null
+
+    while (model == null) {
+      try {
+
+        model = new GprModel(x, y, covFunc, covFuncParams, noiseLogStdDev, meanFunc)
+
+      } catch {
+        case e: Exception => {
+          logger.error(e.getLocalizedMessage + ":" + items.size + ":" + items.head)
+        }
+      }
+    }
+    model
   }
 }

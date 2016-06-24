@@ -58,8 +58,8 @@ object SubmissionApp extends LazyLogging {
     logger.info("Loading test set...")
     val testItemsDAO = AllTrainItemsDAO("c:/perforce/daniel/bimbo/segments/train_9.csv", clientNamesDAO)
     val testItemByProductDAO = ItemByProductDAO(testItemsDAO)
-    //  val testItems = testItemByProductDAO.getProductItems(46232)
-    val testItems = testItemsDAO.getAllItems()
+    val testItems = testItemByProductDAO.getProductItems(46232)
+    //val testItems = testItemsDAO.getAllItems()
     val predictedDemand = model.predict(testItems)
 
     predictedDemand
@@ -68,11 +68,10 @@ object SubmissionApp extends LazyLogging {
   def predictDemand(): DenseVector[Double] = {
 
     val clientNamesDAO = ClientNamesDAO("c:/perforce/daniel/bimbo/cliente_tabla.csv")
-    val allItemsDAO = AllTrainItemsDAO("c:/perforce/daniel/bimbo/segments/train_8.csv", clientNamesDAO)
+    val allItemsDAO = AllTrainItemsDAO("c:/perforce/daniel/bimbo/segments/train_3_to_8.csv", clientNamesDAO)
     val trainItemDAO = ItemByProductDAO(allItemsDAO)
 
-    val avgLogWeeklySaleByClientDAO = AvgLogWeeklySaleDAO("c:/perforce/daniel/bimbo/stats/clientAvgLogWeeklySale_8.csv")
-    val avgLogDemandDAO = AvgLogDemandByClientDAO("c:/perforce/daniel/bimbo/stats/avgLogDemandByClient_8.csv")
+    val avgLogWeeklySaleByClientDAO = AvgLogWeeklySaleDAO("c:/perforce/daniel/bimbo/stats/clientAvgLogWeeklySale_3_8.csv")
 
     logger.info("Creating itemSegmentDAO")
     val itemSegmentDAO = ItemSegmentDAO("target/segmentByProductClient.kryo")

@@ -19,6 +19,7 @@ import bimbo.data.dao.AvgLogWeeklySaleDAO
 import dk.gp.cov.CovSEiso
 import bimbo.data.dao.ItemByProductDAO
 import bimbo.data.dao.AvgLogDemandByClientDAO
+import dk.gp.gpr.gprPredict
 
 case class ClientProductGPModel(trainItemDAO: ItemByProductDAO, avgLogWeeklySaleByClientDAO: AvgLogWeeklySaleDAO,
     avgLogDemandDAO:AvgLogDemandByClientDAO)
@@ -44,7 +45,7 @@ case class ClientProductGPModel(trainItemDAO: ItemByProductDAO, avgLogWeeklySale
         case Some(gpModel)  => {
           
           val x = extractFeatureVec(item).toDenseMatrix
-          val logDemand = dk.gp.gpr.predict(x, gpModel)(0, 0)
+          val logDemand = gprPredict(x, gpModel)(0, 0)
          
           logDemand
         }

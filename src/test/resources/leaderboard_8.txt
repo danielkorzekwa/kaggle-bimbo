@@ -1,3 +1,9 @@
+segment product (100):
+rmse=0.49764 
+
+segment product (500):
+rmse=0.49662 
+
 gp (client,product), all data, gp prior(client sale) - 1306 - SUBMISSION
 rmse=0.51706 
 

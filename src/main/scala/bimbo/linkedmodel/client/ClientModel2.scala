@@ -8,6 +8,7 @@ import dk.gp.gpr.GprModel
 import bimbo.model.clientproductgp.extractFeatureVec
 import dk.gp.cov.CovSEiso
 import breeze.numerics._
+import dk.gp.gpr.gprPredict
 
 case class ClientModel2(avgLogWeeklySaleByClientDAO: AvgLogWeeklySaleDAO) {
 
@@ -28,7 +29,7 @@ case class ClientModel2(avgLogWeeklySaleByClientDAO: AvgLogWeeklySaleDAO) {
       val logDemand = gpModel match {
         case Some(gpModel) => {
           val x = extractFeatureVec(item).toDenseMatrix
-          val logDemand = dk.gp.gpr.predict(x, gpModel)(0, 0)
+          val logDemand = gprPredict(x, gpModel)(0, 0)
           logDemand
         }
         case _ => priorDemandModel.predictLogDemand(item)
