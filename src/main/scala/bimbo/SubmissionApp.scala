@@ -58,8 +58,8 @@ object SubmissionApp extends LazyLogging {
     logger.info("Loading test set...")
     val testItemsDAO = AllTrainItemsDAO("c:/perforce/daniel/bimbo/segments/train_9.csv", clientNamesDAO)
     val testItemByProductDAO = ItemByProductDAO(testItemsDAO)
-    val testItems = testItemByProductDAO.getProductItems(46232)
-    //val testItems = testItemsDAO.getAllItems()
+   // val testItems = testItemByProductDAO.getProductItems(37590)
+    val testItems = testItemsDAO.getAllItems()
     val predictedDemand = model.predict(testItems)
 
     predictedDemand
@@ -82,16 +82,16 @@ object SubmissionApp extends LazyLogging {
     logger.info("Loading test set...")
     val allTestItemsDAO = AllTrainItemsDAO("c:/perforce/daniel/bimbo/segments/train_9.csv", clientNamesDAO)
     val testItemByProductDAO = ItemByProductDAO(allTestItemsDAO)
-   // val testItems = testItemByProductDAO.getProductItems(1278) //getTestItems(trainItemDAO, testItemByProductDAO) //
+  //  val testItems = testItemByProductDAO.getProductItems(37590) //getTestItems(trainItemDAO, testItemByProductDAO) //
         val testItems = allTestItemsDAO.getAllItems()
 
     logger.info("Building model...")
     //    val model = GroupByFallbackModel( trainItemDAO)
-    // val model = ClientProductGPModel(trainItemDAO, avgLogWeeklySaleByClientDAO,avgLogDemandDAO)
+   //  val model = ClientProductGPModel(trainItemDAO, avgLogWeeklySaleByClientDAO,null)
     //   val model = ClientProductHgprModel(trainItemDAO,avgLogWeeklySaleByClientDAO)
     //      val model = ProductGPModel(trainItemDAO, avgLogWeeklySaleByClientDAO, "target/productGPModelParams.kryo",itemSegmentDAO,segmentGPParamsDAO)
     //  val model = DepotProductModel(trainItemDAO, avgLogWeeklySaleByClientDAO)
-    val model = SegmentProductModel(trainItemDAO, avgLogWeeklySaleByClientDAO)
+   val model = SegmentProductModel(trainItemDAO, avgLogWeeklySaleByClientDAO)
 
     logger.info("Predicting demand...")
     val predictedDemand = model.predict(testItems) //.map(d => "%.0f".format(d).toDouble)

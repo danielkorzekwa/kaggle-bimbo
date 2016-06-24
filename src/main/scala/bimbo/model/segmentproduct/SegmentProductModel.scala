@@ -38,7 +38,7 @@ case class SegmentProductModel(trainItemDAO: ItemByProductDAO, avgLogWeeklySaleD
     logger.info("Predicting log demand...")
     val predictedProductDemand = testProductItems.par.map { item =>
 
-      if (trainSize == 0) (item, priorDemandModel.predictLogDemand(item))
+      if (trainSize == 0) (item, exp(priorDemandModel.predictLogDemand(item))-1)
       else {
 
         val gpModel = gpModelsBySegment.get(segmentsByItem.getSegment(item))
@@ -48,7 +48,7 @@ case class SegmentProductModel(trainItemDAO: ItemByProductDAO, avgLogWeeklySaleD
             val clientLogSale = avgLogWeeklySaleDAO.getAvgLogWeeklySaleForClient(item.clientId).getOrElse(5.54149)
             val x = extractFeatureVec(item, clientLogSale).toDenseMatrix
             val logDemand = try {
-             gprPredictMean(x, gpModel)(0)
+              gprPredictMean(x, gpModel)(0)
             } catch {
               case e: Exception => {
                 println(item)

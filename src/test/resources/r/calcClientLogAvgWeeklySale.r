@@ -1,5 +1,5 @@
 #load data
-train_all <- fread('./segments/train_8.csv')
+train_all <- fread('./segments/train_3_to_8.csv')
 
 #Compute avg log venta hoy
 Venta_hoy_avglog <- train_all[,list(Venta_hoy_avglog = log(sum(Venta_hoy+1))),by=list(Semana,Cliente_ID)]

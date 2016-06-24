@@ -1,3 +1,6 @@
+segment product (100 + route + channel)
+rmse=0.49731 
+
 segment product (100):
 rmse=0.49764 
 

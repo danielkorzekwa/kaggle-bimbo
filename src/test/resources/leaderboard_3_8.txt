@@ -1,4 +1,10 @@
-depot client (100):
+segment client (200  + canal,route):
+rmse=0.46806 
+
+segment client (100 +  canal,route):
+rmse=0.46919
+
+segment client (100):
 rmse=0.46929 
 
 gp (client,product), all data, gp prior(client sale) - SUBMISSION 22/06

@@ -2,31 +2,36 @@ package bimbo.model.segmentproduct
 
 import bimbo.data.Item
 import com.typesafe.scalalogging.slf4j.LazyLogging
+import java.util.concurrent.atomic.AtomicInteger
 
 case class SegmentsByItem(items: Seq[Item]) extends LazyLogging{
 
+  def getKey(item:Item) = (item.depotId, item.routeId)
+  
   //key (depot,route)
-  private val segmentsByKey: Map[(Int, Int), Int] = computeSegmentsByKey(items)
+  private val segmentsByKey = computeSegmentsByKey(items)
   def getSegment(item: Item): Int = {
-    segmentsByKey.get((item.depotId, item.routeId)) match {
+    val segmentId = segmentsByKey.get(getKey(item)) match {
       case Some(segmentId) => segmentId
       case None => {
-        val itemKey = segmentsByKey.keys.find{case (depotId,routeId) => depotId==item.depotId}.getOrElse(segmentsByKey.keys.head)
+        val itemKey = segmentsByKey.keys.find{case key => key._1==item.depotId}.getOrElse(segmentsByKey.keys.head)
         segmentsByKey(itemKey)
       }
     }
+    segmentId
   }
 
-  private def computeSegmentsByKey(items: Seq[Item]): Map[(Int, Int), Int] = {
+  private def computeSegmentsByKey(items: Seq[Item]) = {
 
-    val sortedItems = items.sortBy { item => (item.depotId, item.routeId) }
+    val a = new AtomicInteger(0)
+    val sortedItems = items.sortBy { item =>   (item.depotId, item.routeId,item.clientId)}
     var segmentId = 0
     var segmentSize = 0
     var lastKey = (0, 0) //depotId,routeId
-    val segmentsByKey: Map[(Int, Int), Int] = sortedItems.map { item =>
+    val segmentsByKey = sortedItems.map { item =>
 
-      val itemKey = (item.depotId, item.routeId)
-      if (segmentSize > 100 && !itemKey.equals(lastKey)) {
+      val itemKey = getKey(item)
+      if (segmentSize > 200 && !itemKey.equals(lastKey)) {
         segmentId += 1
         segmentSize = 0
       }
