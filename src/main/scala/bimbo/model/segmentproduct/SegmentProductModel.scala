@@ -14,10 +14,13 @@ import dk.gp.gpr.GprModel
 import com.typesafe.scalalogging.slf4j.LazyLogging
 import dk.gp.gpr.gprPredict
 import dk.gp.gpr.gprPredictMean
+import java.util.concurrent.atomic.AtomicInteger
 
 case class SegmentProductModel(trainItemDAO: ItemByProductDAO, avgLogWeeklySaleDAO: AvgLogWeeklySaleDAO) extends DemandModel with LazyLogging {
 
   def predictProductDemand(productId: Int, testProductItems: Seq[Item]): Seq[(Item, Double)] = {
+
+    logger.info("Predicting for product: " + productId)
 
     val trainProductItems = trainItemDAO.getProductItems(productId)
     val trainSize = trainProductItems.size
@@ -29,24 +32,28 @@ case class SegmentProductModel(trainItemDAO: ItemByProductDAO, avgLogWeeklySaleD
     val segmentsByItem = SegmentsByItem(trainProductItems)
 
     logger.info("Building gp models...")
-    val gpModelsBySegment = trainProductItems.groupBy { item => segmentsByItem.getSegment(item) }.par.map {
+    val gpModelsBySegment = trainProductItems.groupBy { item => segmentsByItem.getSegment2(item).get }.par.map {
       case (segmentId, depotItems) =>
         val gpModel = createGprModel(depotItems, meanLogDemand, priorDemandModel)
         (segmentId) -> gpModel
     }
     logger.info("Building gp models...done")
-    logger.info("Predicting log demand...")
+    logger.info("Predicting log demand..., size=" + testProductItems.size)
+
     val predictedProductDemand = testProductItems.par.map { item =>
 
-      if (trainSize == 0) (item, exp(priorDemandModel.predictLogDemand(item))-1)
+      //  logger.info("Predicting item:" + item)
+      if (trainSize == 0) (item, exp(priorDemandModel.predictLogDemand(item)) - 1)
       else {
 
-        val gpModel = gpModelsBySegment.get(segmentsByItem.getSegment(item))
-        val logDemand = gpModel match {
-          case Some(gpModel) => {
+        val segmentId2 = segmentsByItem.getSegment2(item)
+        val clientLogSale = avgLogWeeklySaleDAO.getAvgLogWeeklySaleForClient(item.clientId).getOrElse(5.54149)
+        val x = extractFeatureVec(item, clientLogSale).toDenseMatrix
 
-            val clientLogSale = avgLogWeeklySaleDAO.getAvgLogWeeklySaleForClient(item.clientId).getOrElse(5.54149)
-            val x = extractFeatureVec(item, clientLogSale).toDenseMatrix
+        val logDemand2 = segmentId2 match {
+          case Some(segmentId) => {
+            val gpModel = gpModelsBySegment(segmentId)
+
             val logDemand = try {
               gprPredictMean(x, gpModel)(0)
             } catch {
@@ -56,13 +63,21 @@ case class SegmentProductModel(trainItemDAO: ItemByProductDAO, avgLogWeeklySaleD
                 throw e
               }
             }
-
             logDemand
           }
-          case _ => meanLogDemand
+          case None => {
+            val sortedLogDemands = segmentsByItem.getSegmentIds().par.map { segmentId =>
+              val gpModel = gpModelsBySegment.get(segmentId).get
+              val logDemand = gprPredict(x, gpModel)(0, ::)
+              segmentId -> logDemand.t
+            }.toList.sortBy(x => x._2(1))
+
+            segmentsByItem.addItemSegment(item, sortedLogDemands.head._1)
+            sortedLogDemands.head._2(0)
+          }
         }
 
-        val demand = exp(logDemand) - 1
+        val demand = exp(logDemand2) - 1
 
         (item, demand)
       }

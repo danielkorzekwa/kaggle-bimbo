@@ -1,5 +1,5 @@
 segment client (200  + canal,route):
-rmse=0.46806 
+rmse=0.46724  
 
 segment client (100 +  canal,route):
 rmse=0.46919

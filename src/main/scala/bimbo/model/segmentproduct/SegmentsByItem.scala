@@ -4,27 +4,26 @@ import bimbo.data.Item
 import com.typesafe.scalalogging.slf4j.LazyLogging
 import java.util.concurrent.atomic.AtomicInteger
 
-case class SegmentsByItem(items: Seq[Item]) extends LazyLogging{
+case class SegmentsByItem(items: Seq[Item]) extends LazyLogging {
 
-  def getKey(item:Item) = (item.depotId, item.routeId)
-  
+  private def getKey(item: Item) = (item.depotId, item.routeId)
+
   //key (depot,route)
   private val segmentsByKey = computeSegmentsByKey(items)
-  def getSegment(item: Item): Int = {
-    val segmentId = segmentsByKey.get(getKey(item)) match {
-      case Some(segmentId) => segmentId
-      case None => {
-        val itemKey = segmentsByKey.keys.find{case key => key._1==item.depotId}.getOrElse(segmentsByKey.keys.head)
-        segmentsByKey(itemKey)
-      }
-    }
-    segmentId
+
+  def addItemSegment(item: Item, segmentId: Int) = this.synchronized {
+    segmentsByKey += getKey(item) -> segmentId
   }
+
+  def getSegment2(item: Item): Option[Int] = this.synchronized {
+    segmentsByKey.get(getKey(item))
+  }
+
+  def getSegmentIds(): Seq[Int] = this.synchronized { segmentsByKey.values.toList }
 
   private def computeSegmentsByKey(items: Seq[Item]) = {
 
-    val a = new AtomicInteger(0)
-    val sortedItems = items.sortBy { item =>   (item.depotId, item.routeId,item.clientId)}
+    val sortedItems = items.sortBy { item => (item.depotId, item.routeId, item.clientId) }
     var segmentId = 0
     var segmentSize = 0
     var lastKey = (0, 0) //depotId,routeId
@@ -37,11 +36,13 @@ case class SegmentsByItem(items: Seq[Item]) extends LazyLogging{
       }
 
       segmentSize += 1
+      lastKey = itemKey
 
       (itemKey, segmentId)
 
-    }.toMap
-    logger.info("Number of segments:" + (segmentId+1))
-    segmentsByKey
+    }
+    logger.info("Number of segments:" + (segmentId + 1))
+
+    scala.collection.mutable.Map(segmentsByKey: _*)
   }
 }
