@@ -20,7 +20,7 @@ rmse=0.46477
 gp linked(pg): 
 rmse=0.46448 
 
-gp (client,product), all data, gp prior(client sale), contant mean prior
+gp (client,product), all data, gp prior(client sale), constant mean prior
 rmse=0.46701 
 
 gp (client,product), all data, gp prior(client sale) - 1306 - SUBMISSION

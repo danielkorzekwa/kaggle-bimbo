@@ -1,15 +1,18 @@
 package bimbo
 
-import breeze.linalg._
 import java.io.File
-import breeze.numerics._
-import dk.bayes.math.accuracy.rmse
+
 import com.typesafe.scalalogging.slf4j.LazyLogging
-import bimbo.data.dao.ItemByProductDAO
-import bimbo.data.dao.allitems.AllTestItemsDAO
-import bimbo.data.dao.ClientNamesDAO
-import bimbo.data.dao.allitems.AllTrainItemsDAO
+
 import bimbo.data.Item
+import bimbo.data.dao.ClientNamesDAO
+import bimbo.data.dao.ItemByProductDAO
+import bimbo.data.dao.allitems.AllTrainItemsDAO
+import breeze.linalg.{ * => * }
+import breeze.linalg.DenseVector
+import breeze.linalg.csvread
+import breeze.numerics.log
+import dk.bayes.math.accuracy.rmse
 
 object ScoreEvalApp extends LazyLogging {
 
@@ -18,14 +21,14 @@ object ScoreEvalApp extends LazyLogging {
     logger.info("Compute rmse...")
 
     val clientNamesDAO = ClientNamesDAO("c:/perforce/daniel/bimbo/cliente_tabla.csv")
-    val allItemsDAO = AllTrainItemsDAO("c:/perforce/daniel/bimbo/segments/train_8.csv", clientNamesDAO)
+    val allItemsDAO = AllTrainItemsDAO("c:/perforce/daniel/bimbo/segments/train_3_to_8.csv", clientNamesDAO)
     val trainItemDAO = ItemByProductDAO(allItemsDAO)
 
     val allTestItemsDAO = AllTrainItemsDAO("c:/perforce/daniel/bimbo/segments/train_9.csv", clientNamesDAO)
     val testItemByProductDAO = ItemByProductDAO(allTestItemsDAO)
 
-     val testItems =  testItemByProductDAO.getProductItems(43231)//getTestItems(trainItemDAO, testItemByProductDAO)//testItemByProductDAO.getProductItems(1278)// //testItemByProductDAO.getProductItems(43175) 
-  //  val testItems = allTestItemsDAO.getAllItems()
+  //  val testItems = testItemByProductDAO.getProductItems(43231) //getTestItems(trainItemDAO, testItemByProductDAO)//testItemByProductDAO.getProductItems(1278)// //testItemByProductDAO.getProductItems(43175) 
+      val testItems = allTestItemsDAO.getAllItems()
 
     val predictionData = csvread(new File("target/submission.csv"), skipLines = 1)
 

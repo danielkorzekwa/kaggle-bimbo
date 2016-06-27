@@ -91,8 +91,11 @@ case class SegmentProductModel(trainItemDAO: ItemByProductDAO, avgLogWeeklySaleD
     val y = DenseVector(items.map(i => log(i.demand + 1)).toArray)
 
     val covFunc = SegmentProductCovFunc()
-    val covFuncParams = DenseVector(log(1), log(1), log(1), log(1))
+   val covFuncParams = DenseVector(log(1), log(1), log(1), log(1),log(1),log(1))
     val noiseLogStdDev = log(1)
+    
+   //  val covFuncParams = DenseVector(0.8079692974725987, 0.8620529637197376, -1.2749748663379514, -1.7515573778429132, -3.355482028065813, -2.7077662216789244)
+   // val noiseLogStdDev = -1.070261
 
     val meanVec = DenseVector.zeros[Double](x.rows) + meanLogDemand
 
