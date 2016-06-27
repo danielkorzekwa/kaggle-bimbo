@@ -34,7 +34,7 @@ object TrainSegmentProductModelApp {
 
         DenseMatrix.horzcat(x, y.toDenseMatrix.t)
 
-    }.toList.take(10)
+    }.toList//.take(10)
 
     val covFunc = SegmentProductCovFunc()
     val covFuncParams = DenseVector(log(1), log(1), log(1), log(1), log(1), log(1))

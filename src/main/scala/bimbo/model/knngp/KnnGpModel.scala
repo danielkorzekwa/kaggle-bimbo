@@ -11,7 +11,7 @@ import dk.gp.gpr.GprModel
 import breeze.linalg.DenseMatrix
 import breeze.linalg._
 import breeze.stats._
-import dk.gp.gpr.gprPredictMean
+import dk.gp.gpr.GprPredictEngine
 case class KnnGpModel(trainItemDAO: ItemByProductDAO, avgLogWeeklySaleDAO: AvgLogWeeklySaleDAO) extends DemandModel {
 
   def predictProductDemand(productId: Int, testProductItems: Seq[Item]): Seq[(Item, Double)] = {
@@ -51,7 +51,7 @@ case class KnnGpModel(trainItemDAO: ItemByProductDAO, avgLogWeeklySaleDAO: AvgLo
 
       val gpModel = gpModelsBySegment(cluster)
 
-      val logDemand = gprPredictMean(x, gpModel)(0)
+      val logDemand = gpModel.predictMean(x)(0)
 
       val demand = exp(logDemand) - 1
       (item, demand)
@@ -60,7 +60,7 @@ case class KnnGpModel(trainItemDAO: ItemByProductDAO, avgLogWeeklySaleDAO: AvgLo
     predictedProductDemand
   }
 
-  private def createGprModel(items: Seq[Item], meanLogDemand: Double): GprModel = {
+  private def createGprModel(items: Seq[Item], meanLogDemand: Double): GprPredictEngine = {
     val x = extractFeatureVec(items, avgLogWeeklySaleDAO)
     val y = DenseVector(items.map(i => log(i.demand + 1)).toArray)
 
@@ -92,6 +92,6 @@ case class KnnGpModel(trainItemDAO: ItemByProductDAO, avgLogWeeklySaleDAO: AvgLo
         }
       }
     }
-    model
+    GprPredictEngine(model)
   }
 }

@@ -27,16 +27,18 @@ case class SegmentsByItem(items: Seq[Item]) extends LazyLogging {
     var segmentId = 0
     var segmentSize = 0
     var lastKey = (0, 0) //depotId,routeId
+    var lastClientId = 0
     val segmentsByKey = sortedItems.map { item =>
 
       val itemKey = getKey(item)
-      if (segmentSize > 200 && !itemKey.equals(lastKey)) {
+      if (segmentSize > 200) {
         segmentId += 1
         segmentSize = 0
       }
 
       segmentSize += 1
       lastKey = itemKey
+      lastClientId = item.clientId
 
       (itemKey, segmentId)
 

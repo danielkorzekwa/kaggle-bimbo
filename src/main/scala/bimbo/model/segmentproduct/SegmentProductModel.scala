@@ -13,8 +13,8 @@ import breeze.stats._
 import dk.gp.gpr.GprModel
 import com.typesafe.scalalogging.slf4j.LazyLogging
 import dk.gp.gpr.gprPredict
-import dk.gp.gpr.gprPredictMean
 import java.util.concurrent.atomic.AtomicInteger
+import dk.gp.gpr.GprPredictEngine
 
 case class SegmentProductModel(trainItemDAO: ItemByProductDAO, avgLogWeeklySaleDAO: AvgLogWeeklySaleDAO) extends DemandModel with LazyLogging {
 
@@ -55,7 +55,7 @@ case class SegmentProductModel(trainItemDAO: ItemByProductDAO, avgLogWeeklySaleD
             val gpModel = gpModelsBySegment(segmentId)
 
             val logDemand = try {
-              gprPredictMean(x, gpModel)(0)
+              gpModel.predictMean(x)(0)
             } catch {
               case e: Exception => {
                 println(item)
@@ -68,7 +68,7 @@ case class SegmentProductModel(trainItemDAO: ItemByProductDAO, avgLogWeeklySaleD
           case None => {
             val sortedLogDemands = segmentsByItem.getSegmentIds().par.map { segmentId =>
               val gpModel = gpModelsBySegment.get(segmentId).get
-              val logDemand = gprPredict(x, gpModel)(0, ::)
+              val logDemand = gpModel.predict(x)(0, ::)
               segmentId -> logDemand.t
             }.toList.sortBy(x => x._2(1))
 
@@ -86,7 +86,7 @@ case class SegmentProductModel(trainItemDAO: ItemByProductDAO, avgLogWeeklySaleD
     predictedProductDemand
   }
 
-  private def createGprModel(items: Seq[Item], meanLogDemand: Double, priorDemandModel: PriorLogDemandModel): GprModel = {
+  private def createGprModel(items: Seq[Item], meanLogDemand: Double, priorDemandModel: PriorLogDemandModel): GprPredictEngine = {
     val x = extractFeatureVec(items, avgLogWeeklySaleDAO)
     val y = DenseVector(items.map(i => log(i.demand + 1)).toArray)
 
@@ -94,8 +94,8 @@ case class SegmentProductModel(trainItemDAO: ItemByProductDAO, avgLogWeeklySaleD
    val covFuncParams = DenseVector(log(1), log(1), log(1), log(1),log(1),log(1))
     val noiseLogStdDev = log(1)
     
-   //  val covFuncParams = DenseVector(0.8079692974725987, 0.8620529637197376, -1.2749748663379514, -1.7515573778429132, -3.355482028065813, -2.7077662216789244)
-   // val noiseLogStdDev = -1.070261
+ //    val covFuncParams = DenseVector(0.8747988932392572, 1.1583621879204218, -1.0580826228536655, -0.31826092507377174, -0.29788560362041744, -1.2138633684719795)
+ //   val noiseLogStdDev = -1.0363286325004006
 
     val meanVec = DenseVector.zeros[Double](x.rows) + meanLogDemand
 
@@ -121,6 +121,6 @@ case class SegmentProductModel(trainItemDAO: ItemByProductDAO, avgLogWeeklySaleD
         }
       }
     }
-    model
+    GprPredictEngine(model)
   }
 }
