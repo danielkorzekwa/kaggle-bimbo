@@ -1,3 +1,6 @@
+segment client (200  + canal,route), no rounding :
+rmse=0.46000 -----> LB: 0.45581
+
 segment client (200  + canal,route):
 rmse=0.46724  
 

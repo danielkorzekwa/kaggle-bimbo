@@ -30,7 +30,7 @@ object ScoreEvalApp extends LazyLogging {
     val testItems = testItemByProductDAO.getProductItems(43231) //getTestItems(trainItemDAO, testItemByProductDAO)//testItemByProductDAO.getProductItems(1278)// //testItemByProductDAO.getProductItems(43175) 
   //    val testItems = allTestItemsDAO.getAllItems()
 
-    val predictionData = csvread(new File("target/submission2.csv"), skipLines = 1)
+    val predictionData = csvread(new File("target/submission.csv"), skipLines = 1)
 
     val actual = DenseVector(testItems.map(i => log(i.demand + 1)).toArray)
     val predicted = predictionData(*, ::).map(r => log(r(1) + 1))

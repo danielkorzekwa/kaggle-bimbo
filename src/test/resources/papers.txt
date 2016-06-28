@@ -1,0 +1,45 @@
+Boosting Kernel Models for Regression - https://www.cs.bham.ac.uk/~xin/papers/icdm06SunYao.pdf
+
+Face Alignment using Cascade Gaussian Process Regression Trees - http://www.cv-foundation.org/openaccess/content_cvpr_2015/papers/Lee_Face_Alignment_Using_2015_CVPR_paper.pdf
+
+Fast Gaussian Process Regression using KD-Trees - https://papers.nips.cc/paper/2835-fast-gaussian-process-regression-using-kd-trees.pdf
+
+Tree-structured Gaussian Process Approximations - http://mlg.eng.cam.ac.uk/thang/docs/papers/nips2014_tsgp.pdf
+
+Boosting_GaussianClassification - https://github.com/efebozkir/Boosting_GaussianClassification
+
+Deep Gaussian Processes - http://www.jmlr.org/proceedings/papers/v31/damianou13a.pdf
+
+A Data Parallel Approach for Large-Scale Gaussian Process Modeling - http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.215.7080&rep=rep1&type=pdf
+
+Building Large-Scale Occupancy Maps using an Infinite Mixture of Gaussian Process Experts - http://www.araa.asn.au/acra/acra2012/papers/pap123.pdf
+
+Block-GP: Scalable Gaussian Process Regression for Multimodal Data - http://www.csee.umbc.edu/~kdas1/papers/ICDM10_gp.pdf
+
+Distributed Gaussian Processes - http://jmlr.org/proceedings/papers/v37/deisenroth15.pdf
+
+Virtual Sensors and Large-scale Gaussian Processes - 
+
+LargeScale Gaussian Process Classification Using Random Decision Forests1 - http://hera.inf-cv.uni-jena.de:6680/pdf/Froehlich12:LGP.pdf
+
+Large-Scale Gaussian Process Multi-Class Classification for Semantic Segmentation and Facade Recognition - http://hera.inf-cv.uni-jena.de:6680/pdf/Froehlich13:GSS.pdf
+
+Sparse Probabilistic Regression for Activity-independent Human Pose Inference - http://people.csail.mit.edu/rurtasun/publications/urtasun_darrell_cvpr08.pdf
+
+Modelling Smooth Paths Using Gaussian Processes - https://hal.archives-ouvertes.fr/inria-00181664/document
+
+Mondrian Forests for Large-Scale Regression when Uncertainty Matters - https://arxiv.org/pdf/1506.03805.pdf
+
+Tree Decomposition for Large-Scale SVM Problems - http://www.jmlr.org/papers/volume11/chang10b/chang10b.pdf
+
+Treed Gaussian Process Models for Classification - http://bobby.gramacy.com/papers/gfkl-274.pdf
+
+Bayesian Treed Gaussian Process Models with an Application to Computer Modeling - https://arxiv.org/pdf/0710.4536.pdf
+
+Tree-structured Gaussian Process Approximations - https://papers.nips.cc/paper/5459-tree-structured-gaussian-process-approximations.pdf
+
+Bayesian treed Gaussian process models - http://bobby.gramacy.com/prepo/gra2006-01.pdf
+
+
+
+

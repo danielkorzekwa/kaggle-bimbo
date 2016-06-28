@@ -83,8 +83,8 @@ object SubmissionApp extends LazyLogging {
     logger.info("Loading test set...")
     val allTestItemsDAO = AllTrainItemsDAO("c:/perforce/daniel/bimbo/segments/train_9.csv", clientNamesDAO)
     val testItemByProductDAO = ItemByProductDAO(allTestItemsDAO)
-  //   val testItems = testItemByProductDAO.getProductItems(43231) //getTestItems(trainItemDAO, testItemByProductDAO) //
-    val testItems = allTestItemsDAO.getAllItems()
+     val testItems = testItemByProductDAO.getProductItems(35305) //getTestItems(trainItemDAO, testItemByProductDAO) //
+  //  val testItems = allTestItemsDAO.getAllItems()
 
     logger.info("Building model...")
     //    val model = GroupByFallbackModel( trainItemDAO)

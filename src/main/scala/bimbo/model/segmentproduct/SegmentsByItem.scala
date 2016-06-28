@@ -6,6 +6,10 @@ import java.util.concurrent.atomic.AtomicInteger
 
 case class SegmentsByItem(items: Seq[Item]) extends LazyLogging {
 
+  private val itemsSize=items.size
+  
+  private val maxSegmentSize = (4e8/itemsSize).max(200).min(500).toInt
+  
   private def getKey(item: Item) = (item.depotId, item.routeId)
 
   //key (depot,route)
@@ -31,7 +35,7 @@ case class SegmentsByItem(items: Seq[Item]) extends LazyLogging {
     val segmentsByKey = sortedItems.map { item =>
 
       val itemKey = getKey(item)
-      if (segmentSize > 200) {
+      if (segmentSize > maxSegmentSize) {
         segmentId += 1
         segmentSize = 0
       }
