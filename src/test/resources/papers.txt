@@ -40,6 +40,17 @@ Tree-structured Gaussian Process Approximations - https://papers.nips.cc/paper/5
 
 Bayesian treed Gaussian process models - http://bobby.gramacy.com/prepo/gra2006-01.pdf
 
+Fast Allocation of Gaussian Process Experts - http://jmlr.org/proceedings/papers/v32/nguyena14.pdf
+
+A Framework for Evaluating Approximation Methods for Gaussian Process Regression - https://arxiv.org/pdf/1205.6326.pdf
+
+Empirical evaluation of Gaussian Process approximation algorithms - http://homepages.inf.ed.ac.uk/ckiw/postscript/Chalupka2011diss.pdf
+
+Gaussian process for nonstationary time series prediction - http://www.ece.ust.hk/~eebermak/papers/GP.pdf
+
+Gaussian Processes for Global Optimization - http://gpss.cc/gpss15/talks/gpgo-gpss2015.pdf
+
+Bagging for Gaussian Process Regression - http://epubs.surrey.ac.uk/6481/6/tchen09-neucomp.pdf
 
 
 
