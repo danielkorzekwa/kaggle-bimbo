@@ -20,15 +20,15 @@ object ScoreEvalApp extends LazyLogging {
 
     logger.info("Compute rmse...")
 
-    val clientNamesDAO = ClientNamesDAO("c:/perforce/daniel/bimbo/cliente_tabla.csv")
-    val allItemsDAO = AllTrainItemsDAO("c:/perforce/daniel/bimbo/segments/train_3_to_8.csv", clientNamesDAO)
+    val clientNamesDAO = ClientNamesDAO("/mnt/bimbo/cliente_tabla.csv")
+    val allItemsDAO = AllTrainItemsDAO("/mnt/bimbo/segments/train_3_to_8.csv", clientNamesDAO)
     val trainItemDAO = ItemByProductDAO(allItemsDAO)
 
-    val allTestItemsDAO = AllTrainItemsDAO("c:/perforce/daniel/bimbo/segments/train_9.csv", clientNamesDAO)
+    val allTestItemsDAO = AllTrainItemsDAO("/mnt/bimbo/segments/train_9.csv", clientNamesDAO)
     val testItemByProductDAO = ItemByProductDAO(allTestItemsDAO)
 
-    val testItems = testItemByProductDAO.getProductItems(43231) //getTestItems(trainItemDAO, testItemByProductDAO)//testItemByProductDAO.getProductItems(1278)// //testItemByProductDAO.getProductItems(43175) 
-  //    val testItems = allTestItemsDAO.getAllItems()
+  //  val testItems = testItemByProductDAO.getProductItems(43231) //getTestwItems(trainItemDAO, testItemByProductDAO)//testItemByProductDAO.getProductItems(1278)// //testItemByProductDAO.getProductItems(43175) 
+      val testItems = allTestItemsDAO.getAllItems()
 
     val predictionData = csvread(new File("target/submission.csv"), skipLines = 1)
 
