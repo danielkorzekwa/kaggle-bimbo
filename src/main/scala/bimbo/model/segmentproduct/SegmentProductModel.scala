@@ -39,8 +39,8 @@ case class SegmentProductModel(trainItemDAO: ItemByProductDAO, avgLogWeeklySaleD
         (segmentId) -> gpModel
     }
     logger.info("Building gp models...done")
+    
     logger.info("Predicting log demand..., size=" + testProductItems.size)
-
     val predictedProductDemand = testProductItems.par.map { item =>
 
       //  logger.info("Predicting item:" + item)

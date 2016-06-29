@@ -1,3 +1,6 @@
+segment client (500 + canal,route), no rounding:
+rmse=0.45924 
+
 segment client (200-500 + canal,route), no rounding:
 rmse=0.45936 
 

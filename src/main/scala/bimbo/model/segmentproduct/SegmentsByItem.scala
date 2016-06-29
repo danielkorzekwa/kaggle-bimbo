@@ -8,7 +8,7 @@ case class SegmentsByItem(items: Seq[Item]) extends LazyLogging {
 
   private val itemsSize=items.size
   
-  private val maxSegmentSize = (4e8/itemsSize).max(200).min(500).toInt
+  private val maxSegmentSize = 500//(4e8/itemsSize).max(200).min(500).toInt
   
   private def getKey(item: Item) = (item.depotId, item.routeId)
 
