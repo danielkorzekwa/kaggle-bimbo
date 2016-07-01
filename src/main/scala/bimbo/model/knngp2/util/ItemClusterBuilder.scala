@@ -1,4 +1,4 @@
-package bimbo.model.knngp
+package bimbo.model.knngp2.util
 
 import com.typesafe.scalalogging.slf4j.LazyLogging
 import scala.collection.mutable.ListBuffer
@@ -7,7 +7,6 @@ import scala.util.Random
 import bimbo.data.Item
 import breeze.linalg.DenseVector
 import bimbo.data.dao.AvgLogWeeklySaleDAO
-import bimbo.model.knngp.util.FeatureVectorFactory
 import dk.gp.cov.CovFunc
 
 //clustering scheme
@@ -26,7 +25,7 @@ case class ItemClusterBuilder(itemCovFunc: CovFunc, covFuncParams: DenseVector[D
       itemClusters += item -> ListBuffer(item)
     } else {
 
-      val (cluster, distance) = getNearestCluster(item).head
+      val (cluster, distance) = getNearestClusters(item).head
 
       if (distance > threshold) itemClusters(cluster) += item
       else {
@@ -37,7 +36,7 @@ case class ItemClusterBuilder(itemCovFunc: CovFunc, covFuncParams: DenseVector[D
 
   }
 
-  def getNearestCluster(item: Item): Seq[(Item, Double)] = {
+  def getNearestClusters(item: Item): Seq[(Item, Double)] = {
     val nearestClusters = itemClusters.keys.map { cluster =>
 
       val itemFeatureVec = featureVectorFactory.create(item)
@@ -51,7 +50,7 @@ case class ItemClusterBuilder(itemCovFunc: CovFunc, covFuncParams: DenseVector[D
    nearestClusters
   }
   def getNNearestItems(item:Item,n:Int):Seq[Item] = {
-    val nearestClusters = getNearestCluster(item)
+    val nearestClusters = getNearestClusters(item)
     
     val nearestItems = ListBuffer[Item]()
     

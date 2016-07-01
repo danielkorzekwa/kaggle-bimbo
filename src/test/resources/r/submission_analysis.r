@@ -7,7 +7,7 @@ test_all <- fread('./segments/train_9.csv')
 
 test <- test_all[Producto_ID==43231]
 s_1 <- fread('prediction_analysis/submission_best.csv')
-s_2 <- fread('prediction_analysis/submission_isNewProduct.csv')
+s_2 <- fread('prediction_analysis/submission_new.csv')
 
 #compute se
 test$pred1 <- s_1$Demanda_uni_equil
@@ -25,6 +25,6 @@ merged <- merge(merged,Venta_hoy_avglog,by='Cliente_ID')
 d1 <- merged[is.na(N)]
 d2 <- merged[is.na(N)]
 
-ggplot() + stat_smooth(aes(col='d1',x=d1$Venta_hoy_avglog,y=log(d1$Demanda_uni_equil+1))) +  geom_smooth(aes(col='d2',x=d2$Venta_hoy_avglog,y=log(d2$pred2+1))) 
+ggplot() + stat_smooth(aes(col='d1',x=d1$Venta_hoy_avglog,y=log(d1$Demanda_uni_equil+1))) +  geom_smooth(aes(col='d2',x=d2$Venta_hoy_avglog,y=log(d2$pred1+1))) 
 
 ggplot() + stat_summary(fun.y="mean",geom="point",aes(x=d$Venta_hoy_avglog,y=log(d$Demanda_uni_equil+1))) 

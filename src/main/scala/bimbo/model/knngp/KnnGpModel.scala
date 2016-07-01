@@ -48,7 +48,7 @@ case class KnnGpModel(trainItemDAO: ItemByProductDAO, avgLogWeeklySaleDAO: AvgLo
      val covFuncParams = DenseVector(log(1), log(1), log(1), log(1), log(1), log(1), log(1))
     // val covFuncParams = DenseVector(0.36952393709334364, 0.6792218479309723, -1.067240272041124, -0.5003187242401969, -0.4527152017680887, -1.6057270907193402, -2.0658541053386887)
    
-    val itemClusterBuilder = ItemClusterBuilder(KnnGPCovFunc(), covFuncParams, threshold = 3, featureVectorFactory)
+    val itemClusterBuilder = ItemClusterBuilder(KnnGPCovFunc(), covFuncParams, threshold = 4.5, featureVectorFactory)
 
     trainProductItems.foreach { item =>
       itemClusterBuilder.processItem(item)
@@ -57,10 +57,10 @@ case class KnnGpModel(trainItemDAO: ItemByProductDAO, avgLogWeeklySaleDAO: AvgLo
     itemClusterBuilder.getClusters().toList.sortBy(_._2.size).foreach { case (item, items) => println(items.size) }
 
     logger.info("Building gp models...")
-    val gpModelsBySegment = itemClusterBuilder.getClusters().map {
+    val gpModelsBySegment = itemClusterBuilder.getClusters().par.map {
       case (item, items) =>
 
-        val nearestItems = itemClusterBuilder.getNNearestItems(item, 200).take(200)
+        val nearestItems = itemClusterBuilder.getNNearestItems(item, 100).take(100)
 
         println(nearestItems.size)
         val gpModel = createGprModel(nearestItems, meanLogDemand, featureVectorFactory,priorDemandModel)
@@ -68,11 +68,10 @@ case class KnnGpModel(trainItemDAO: ItemByProductDAO, avgLogWeeklySaleDAO: AvgLo
     }
     logger.info("Building gp models...done")
 
-    val predictedProductDemand = testProductItems.map { item =>
+    val predictedProductDemand = testProductItems.par.map { item =>
 
       val (cluster, covVal) = itemClusterBuilder.getNearestCluster(item).head
 
-      val clientLogSale = avgLogWeeklySaleDAO.getAvgLogWeeklySaleForClient(item.clientId).getOrElse(5.54149)
       val x = featureVectorFactory.create(item).toDenseMatrix
 
       val gpModel = gpModelsBySegment(cluster)
@@ -81,7 +80,7 @@ case class KnnGpModel(trainItemDAO: ItemByProductDAO, avgLogWeeklySaleDAO: AvgLo
 
       val demand = exp(logDemand) - 1
       (item, demand)
-    }
+    }.toList
 
     predictedProductDemand
   }

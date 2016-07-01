@@ -25,6 +25,7 @@ lazy val root = (project in file(".")).
       "com.typesafe.scala-logging" %% "scala-logging-slf4j" % "2.1.2",
       "joda-time" % "joda-time" % "2.7",
       "org.apache.spark" % "spark-core_2.11" % "1.6.1",
+      "com.github.haifengl" % "smile-core" % "1.1.0",
       // test scoped
       "com.novocode" % "junit-interface" % "0.11" % Test
     ),
