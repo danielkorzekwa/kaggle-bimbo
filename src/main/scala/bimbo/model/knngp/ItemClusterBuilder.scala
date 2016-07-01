@@ -7,14 +7,18 @@ import scala.util.Random
 import bimbo.data.Item
 import breeze.linalg.DenseVector
 import bimbo.data.dao.AvgLogWeeklySaleDAO
+import bimbo.model.knngp.util.FeatureVectorFactory
 
 //clustering scheme
 //http://www.kyb.mpg.de/fileadmin/user_upload/files/publications/attachments/Nguyen-Tuong-ModelLearningLocalGaussianl_6067%5b0%5d.pdf
-case class ItemClusterBuilder(itemCovFunc: KnnGPCovFunc, covFuncParams: DenseVector[Double], threshold: Double, avgLogWeeklySaleDAO: AvgLogWeeklySaleDAO)
+case class ItemClusterBuilder(itemCovFunc: KnnGPCovFunc, covFuncParams: DenseVector[Double], threshold: Double, 
+    featureVectorFactory:FeatureVectorFactory)
     extends LazyLogging {
 
   private var itemClusters = mutable.Map[Item, ListBuffer[Item]]()
 
+  def getItemClusters() = itemClusters
+  
   def processItem(item: Item) = {
 
     if (itemClusters.isEmpty) {
@@ -35,11 +39,9 @@ case class ItemClusterBuilder(itemCovFunc: KnnGPCovFunc, covFuncParams: DenseVec
   def getNearestCluster(item: Item): Seq[(Item, Double)] = {
     val nearestClusters = itemClusters.keys.map { cluster =>
 
-      val itemClientLogSale = avgLogWeeklySaleDAO.getAvgLogWeeklySaleForClient(item.clientId).getOrElse(5.54149)
-      val itemFeatureVec = extractFeatureVec(item, itemClientLogSale)
+      val itemFeatureVec = featureVectorFactory.create(item)
 
-      val clusterClientLogSale = avgLogWeeklySaleDAO.getAvgLogWeeklySaleForClient(cluster.clientId).getOrElse(5.54149)
-      val clusterFeatureVec = extractFeatureVec(cluster, clusterClientLogSale)
+      val clusterFeatureVec = featureVectorFactory.create(cluster)
       val covValue = itemCovFunc.cov(itemFeatureVec.toDenseMatrix, clusterFeatureVec.toDenseMatrix, covFuncParams)(0, 0)
 
       cluster -> covValue

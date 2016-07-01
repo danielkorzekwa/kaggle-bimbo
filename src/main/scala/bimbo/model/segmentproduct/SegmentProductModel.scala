@@ -16,6 +16,8 @@ import dk.gp.gpr.gprPredict
 import java.util.concurrent.atomic.AtomicInteger
 import dk.gp.gpr.GprPredictEngine
 import dk.gp.gpr.GprPredictEngine
+import bimbo.model.segmentproduct.util.calcNewProductMap
+import bimbo.model.segmentproduct.util.FeatureVectorFactory
 
 case class SegmentProductModel(trainItemDAO: ItemByProductDAO, avgLogWeeklySaleDAO: AvgLogWeeklySaleDAO) extends DemandModel with LazyLogging {
 
@@ -25,6 +27,11 @@ case class SegmentProductModel(trainItemDAO: ItemByProductDAO, avgLogWeeklySaleD
 
     val trainProductItems = trainItemDAO.getProductItems(productId)
     val trainSize = trainProductItems.size
+
+    val trainAndTestItems = trainProductItems ++ testProductItems
+    val newProductMap: Map[Item, Boolean] = calcNewProductMap(trainAndTestItems)
+    val featureVectorFactory = FeatureVectorFactory(avgLogWeeklySaleDAO, newProductMap)
+
     val priorDemandModel = PriorLogDemandModel(trainProductItems, avgLogWeeklySaleDAO, null)
 
     val y = DenseVector(trainProductItems.map(i => log(i.demand + 1)).toArray)
@@ -33,26 +40,26 @@ case class SegmentProductModel(trainItemDAO: ItemByProductDAO, avgLogWeeklySaleD
     val segmentsByItem = SegmentsByItem(trainProductItems)
 
     logger.info("Building gp models...")
-    val gpModelsBySegment = trainProductItems.groupBy { item => segmentsByItem.getSegment2(item).get }.par.map {
+    val gpModelsBySegment = trainProductItems.groupBy { item => segmentsByItem.getSegment(item).get }.par.map {
       case (segmentId, depotItems) =>
-        val gpModel = createGprModel(depotItems, meanLogDemand, priorDemandModel)
+        val gpModel = createGprModel(depotItems, meanLogDemand, priorDemandModel, featureVectorFactory)
         (segmentId) -> gpModel
     }
     logger.info("Building gp models...done")
-    
+
     logger.info("Predicting log demand..., size=" + testProductItems.size)
     val predictedProductDemand = testProductItems.par.map { item =>
 
       //  logger.info("Predicting item:" + item)
       if (trainSize == 0) (item, exp(priorDemandModel.predictLogDemand(item)) - 1)
       else {
-
-        val segmentId2 = segmentsByItem.getSegment2(item)
-        val clientLogSale = avgLogWeeklySaleDAO.getAvgLogWeeklySaleForClient(item.clientId).getOrElse(5.54149)
-        val x = extractFeatureVec(item, clientLogSale).toDenseMatrix
-
-        val logDemand2 = segmentId2 match {
+  
+        val segmentId = segmentsByItem.getSegment(item)
+        val x = featureVectorFactory.create(item).toDenseMatrix
+        val logDemand2 = segmentId match {
           case Some(segmentId) => {
+            
+        
             val gpModel = gpModelsBySegment(segmentId)
 
             val logDemand = try {
@@ -64,17 +71,21 @@ case class SegmentProductModel(trainItemDAO: ItemByProductDAO, avgLogWeeklySaleD
                 throw e
               }
             }
+  
             logDemand
           }
-          case None => {
+          case _ => {
+                    
             val sortedLogDemands = segmentsByItem.getSegmentIds().par.map { segmentId =>
               val gpModel = gpModelsBySegment.get(segmentId).get
               val logDemand = gpModel.predict(x)(0, ::)
               segmentId -> logDemand.t
             }.toList.sortBy(x => x._2(1))
-
-            segmentsByItem.addItemSegment(item, sortedLogDemands.head._1)
-            sortedLogDemands.head._2(0)
+     
+         segmentsByItem.addItemSegment(item, sortedLogDemands.head._1)
+            
+           val logDemand = sortedLogDemands.head._2(0) 
+            logDemand
           }
         }
 
@@ -87,18 +98,18 @@ case class SegmentProductModel(trainItemDAO: ItemByProductDAO, avgLogWeeklySaleD
     predictedProductDemand
   }
 
-  private def createGprModel(items: Seq[Item], meanLogDemand: Double, priorDemandModel: PriorLogDemandModel): GprPredictEngine = {
-    val x = extractFeatureVec(items, avgLogWeeklySaleDAO)
+  private def createGprModel(items: Seq[Item], meanLogDemand: Double, priorDemandModel: PriorLogDemandModel,
+                             featureVectorFactory: FeatureVectorFactory): GprPredictEngine = {
+    val x = featureVectorFactory.create(items)
     val y = DenseVector(items.map(i => log(i.demand + 1)).toArray)
 
     val covFunc = SegmentProductCovFunc()
-    val covFuncParams = DenseVector(log(1), log(1), log(1), log(1), log(1), log(1))
+    val covFuncParams = DenseVector(log(1), log(1), log(1), log(1), log(1), log(1),log(1))
     val noiseLogStdDev = log(1)
 
-    //    val covFuncParams = DenseVector(0.8747988932392572, 1.1583621879204218, -1.0580826228536655, -0.31826092507377174, -0.29788560362041744, -1.2138633684719795)
-    //   val noiseLogStdDev = -1.0363286325004006
+     //   val covFuncParams = DenseVector(0.4825566762220455, 0.8804206240310104, -1.0475481756870566, -1.538927576519421, -1.4900115584427644, -1.487285360420513, -2.2779017293273958)
+     //  val noiseLogStdDev = -1.060649
 
-    val meanVec = DenseVector.zeros[Double](x.rows) + meanLogDemand
 
     def meanFunc(x: DenseMatrix[Double]): DenseVector[Double] = {
       val meanVec = x(*, ::).map { x =>

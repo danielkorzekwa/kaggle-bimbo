@@ -8,34 +8,39 @@ case class SegmentsByItem(items: Seq[Item]) extends LazyLogging {
 
   private val itemsSize=items.size
   
-  private val maxSegmentSize = 500//(4e8/itemsSize).max(200).min(500).toInt
+  private val maxSegmentSize = 200//(4e8/itemsSize).max(200).min(500).toInt
   
   private def getKey(item: Item) = (item.depotId, item.routeId)
 
   //key (depot,route)
   private val segmentsByKey = computeSegmentsByKey(items)
+ logger.info("Number of segments:" + getSegmentIds().size)
 
   def addItemSegment(item: Item, segmentId: Int) = this.synchronized {
     segmentsByKey += getKey(item) -> segmentId
   }
 
-  def getSegment2(item: Item): Option[Int] = this.synchronized {
+  def getSegment(item: Item): Option[Int] = this.synchronized {
     segmentsByKey.get(getKey(item))
   }
 
-  def getSegmentIds(): Seq[Int] = this.synchronized { segmentsByKey.values.toList }
+  def getSegmentIds(): Seq[Int] = this.synchronized { segmentsByKey.values.toList.distinct }
 
   private def computeSegmentsByKey(items: Seq[Item]) = {
 
     val sortedItems = items.sortBy { item => (item.depotId, item.routeId, item.clientId) }
+    
+    
+    
     var segmentId = 0
     var segmentSize = 0
     var lastKey = (0, 0) //depotId,routeId
     var lastClientId = 0
     val segmentsByKey = sortedItems.map { item =>
 
+      
       val itemKey = getKey(item)
-      if (segmentSize > maxSegmentSize) {
+      if (segmentSize > maxSegmentSize && !lastKey.equals(itemKey) && lastClientId!=item.clientId) {
         segmentId += 1
         segmentSize = 0
       }

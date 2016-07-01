@@ -18,10 +18,10 @@ case class KnnGPCovFunc() extends CovFunc {
     val depotIdCov = covNoise.cov(x1(::, 2 to 2), x2(::, 2 to 2), covFuncParams(3 to 3))
     val channelId = covNoise.cov(x1(::, 3 to 3), x2(::, 3 to 3), covFuncParams(4 to 4))
     val routeId = covNoise.cov(x1(::, 4 to 4), x2(::, 4 to 4), covFuncParams(5 to 5))
-    val cov = depotIdCov + logSaleCov + clientIdCov + channelId + routeId
-
+    val isNewProductCov = covNoise.cov(x1(::, 5 to 5), x2(::, 5 to 5), covFuncParams(6 to 6))
+    val cov = logSaleCov + clientIdCov + depotIdCov + channelId + routeId + isNewProductCov
+   // cov
     cov
- //   depotIdCov + routeId + logSaleCov + clientIdCov
   }
 
   def covD(x1: DenseMatrix[Double], x2: DenseMatrix[Double], covFuncParams: DenseVector[Double]): Array[DenseMatrix[Double]] = {

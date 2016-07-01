@@ -1,3 +1,6 @@
+segment client (200  + canal,route), no rounding, isNewProduct:
+rmse=0.46171
+
 segment client (500 + canal,route), no rounding:
 rmse=0.45924 
 

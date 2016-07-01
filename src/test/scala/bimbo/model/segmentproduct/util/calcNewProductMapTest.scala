@@ -6,6 +6,9 @@ import bimbo.data.dao.allitems.AllTrainItemsDAO
 import bimbo.data.dao.ClientNamesDAO
 import bimbo.data.dao.ItemByProductDAO
 import bimbo.data.Item
+import breeze.linalg.DenseMatrix
+import breeze.linalg._
+import dk.gp.util.csvwrite
 
 class calcNewProductMapTest {
 
@@ -31,5 +34,8 @@ class calcNewProductMapTest {
     val newProduct = Item(9, 1387, 1, 1012, 408251, "SALVADOR SAUCEDO PENA", 43231, 2.0)
     assertTrue(newProductMap(newProduct))
 
+    val isNewProductVec = DenseMatrix(testItems.map(i => if(newProductMap(i)) 1.0 else 0).toArray).t
+    
+    csvwrite("target/isNewProductVec_test.csv",isNewProductVec,header="isNewProduct")
   }
 }

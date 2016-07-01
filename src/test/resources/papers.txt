@@ -53,4 +53,27 @@ Gaussian Processes for Global Optimization - http://gpss.cc/gpss15/talks/gpgo-gp
 Bagging for Gaussian Process Regression - http://epubs.surrey.ac.uk/6481/6/tchen09-neucomp.pdf
 
 
++++++++++++++++++++++++++++++++++++++
+
+
+
+Local Gaussian process approximation for large computer experiments
+https://arxiv.org/pdf/1303.0383.pdf
+
+Massively parallel approximate Gaussian process regression
+https://arxiv.org/pdf/1310.5182v2.pdf
+
+XGBoost: A Scalable Tree Boosting System
+https://arxiv.org/pdf/1603.02754v3.pdf
+
+XGBoost: Reliable Large-scale Tree Boosting System
+http://learningsys.org/papers/LearningSys_2015_paper_32.pdf
+
+http://stackoverflow.com/questions/2523791/efficient-method-for-finding-knn-of-all-nodes-in-a-kd-tree
+http://scikit-learn.org/stable/modules/neighbors.html#nearest-neighbor-algorithms
+
+
+
+
+
 

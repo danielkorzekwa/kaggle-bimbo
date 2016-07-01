@@ -1,1 +1,5 @@
 https://vpsboard.com/topic/4241-running-a-lightweight-gui-on-your-vps-via-x2go/
+
+
+https://support.rstudio.com/hc/en-us/community/posts/206330288-Can-t-install-latest-version-of-Rstudio
+http://askubuntu.com/questions/694368/problems-installing-rstudio-the-program-wont-start-although-it-is-installed
