@@ -33,7 +33,7 @@ object SubmissionApp extends LazyLogging {
     logger.info("Generating submission...")
 
     // val predictedDemand = predictDemand().map(demand => "%.10f".format(demand.max(0)))
-    val predictedDemand = predictDemand().map(demand => demand.toString)
+    val predictedDemand = predictDemandSubmission().map(demand => demand.toString)
 
     logger.info("Saving submission...")
     val idColumn = if (predictedDemand.size == 1) DenseVector(0.toString) else DenseVector.rangeD(0, predictedDemand.size, 1).map(x => "%.0f".format(x))
@@ -112,14 +112,14 @@ object SubmissionApp extends LazyLogging {
 
   def predictDemandSubmission(): DenseVector[Double] = {
 
-    val clientNamesDAO = ClientNamesDAO("c:/perforce/daniel/bimbo/cliente_tabla.csv")
-    val allItemsDAO = AllTrainItemsDAO("c:/perforce/daniel/bimbo/train.csv", clientNamesDAO)
+    val clientNamesDAO = ClientNamesDAO("/mnt/bimbo/cliente_tabla.csv")
+    val allItemsDAO = AllTrainItemsDAO("/mnt/bimbo/train.csv", clientNamesDAO)
     val itemDAO = ItemByProductDAO(allItemsDAO)
 
-    val avgLogWeeklySaleByClientDAO = AvgLogWeeklySaleDAO("c:/perforce/daniel/bimbo/stats/clientAvgLogWeeklySale_3_9.csv")
+    val avgLogWeeklySaleByClientDAO = AvgLogWeeklySaleDAO("/mnt/bimbo/stats/clientAvgLogWeeklySale_3_9.csv")
 
     logger.info("Loading test set...")
-    val testItems = AllTestItemsDAO("c:/perforce/daniel/bimbo/test.csv", clientNamesDAO).getAllItems()
+    val testItems = AllTestItemsDAO("/mnt/daniel/bimbo/test.csv", clientNamesDAO).getAllItems()
 
     logger.info("Building model...")
     //   val model = ClientProductGPModel(itemDAO, avgLogWeeklySaleByClientDAO, null)
