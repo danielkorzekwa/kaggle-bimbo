@@ -50,7 +50,7 @@ case class KnnGp2Model(trainItemDAO: ItemByProductDAO, avgLogWeeklySaleDAO: AvgL
     val testSize = testProductItems.size
     val predictedProductDemand = testProductItems.par.map { testItem =>
       
-      if(i.getAndIncrement % 10 ==0) logger.info("Predicting %d/%d".format(i.get,testSize))
+      if(i.getAndIncrement % 100 ==0) logger.info("Predicting %d/%d".format(i.get,testSize))
       val x = featureVectorFactory.create(testItem).toDenseMatrix
 
       val trainKNNSet = knnModel.getKNN(testItem, 100)

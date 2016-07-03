@@ -10,9 +10,9 @@ case class ItemDistance(covFunc:CovFunc,covFuncParams:DenseVector[Double]) exten
   def d(x: Array[Double], y: Array[Double]): Double = {
       val xData = DenseMatrix(x)
       val yData = DenseMatrix(y)
- //   6-  covFunc.cov(xData, yData, covFuncParams)(0, 0)
+    6-  covFunc.cov(xData, yData, covFuncParams)(0, 0)
    
-    val d = xData.toDenseVector-yData.toDenseVector
-    norm(d,2)
+ //   val d = xData.toDenseVector-yData.toDenseVector
+ //   norm(d,2)
     }  
     }

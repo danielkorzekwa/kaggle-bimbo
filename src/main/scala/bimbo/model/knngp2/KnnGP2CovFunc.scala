@@ -19,7 +19,7 @@ case class KnnGP2CovFunc() extends CovFunc {
     val channelId = covNoise.cov(x1(::, 3 to 3), x2(::, 3 to 3), covFuncParams(4 to 4))
     val routeId = covNoise.cov(x1(::, 4 to 4), x2(::, 4 to 4), covFuncParams(5 to 5))
     val isNewProductCov = covNoise.cov(x1(::, 5 to 5), x2(::, 5 to 5), covFuncParams(6 to 6))
-    val cov = logSaleCov + clientIdCov + depotIdCov + channelId + routeId + isNewProductCov
+    val cov = logSaleCov + clientIdCov //+ depotIdCov + channelId + routeId + isNewProductCov
    // cov
     cov
   }

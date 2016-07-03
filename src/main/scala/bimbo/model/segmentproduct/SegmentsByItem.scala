@@ -40,7 +40,7 @@ case class SegmentsByItem(items: Seq[Item]) extends LazyLogging {
 
       
       val itemKey = getKey(item)
-      if (segmentSize > maxSegmentSize && !lastKey.equals(itemKey) && lastClientId!=item.clientId) {
+      if (segmentSize > maxSegmentSize ) {
         segmentId += 1
         segmentSize = 0
       }

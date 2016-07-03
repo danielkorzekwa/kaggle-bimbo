@@ -1,3 +1,6 @@
+segment client (200  + canal,route), no rounding, mult cov :
+rmse=0.45999  
+
 segment client (200  + canal,route), no rounding, isNewProduct:
 rmse=0.46171
 

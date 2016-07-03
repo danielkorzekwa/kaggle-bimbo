@@ -103,7 +103,7 @@ case class SegmentProductModel(trainItemDAO: ItemByProductDAO, avgLogWeeklySaleD
     val x = featureVectorFactory.create(items)
     val y = DenseVector(items.map(i => log(i.demand + 1)).toArray)
 
-    val covFunc = SegmentProductCovFunc()
+    val covFunc = SegmentProductCovFunc2()
     val covFuncParams = DenseVector(log(1), log(1), log(1), log(1), log(1), log(1),log(1))
     val noiseLogStdDev = log(1)
 
