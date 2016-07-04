@@ -23,7 +23,6 @@ import bimbo.model.clientproducthgpr.ClientProductHgprModel
 import bimbo.model.clientproducthgpr.ClientProductHgprModel
 import bimbo.data.dao.AvgLogDemandByClientDAO
 import bimbo.model.segmentproduct.SegmentProductModel
-import bimbo.model.knngp.KnnGpModel
 import bimbo.model.knngp2.KnnGp2Model
 
 object SubmissionApp extends LazyLogging {
@@ -33,7 +32,7 @@ object SubmissionApp extends LazyLogging {
     logger.info("Generating submission...")
 
     // val predictedDemand = predictDemand().map(demand => "%.10f".format(demand.max(0)))
-    val predictedDemand = predictDemandSubmission().map(demand => demand.toString)
+    val predictedDemand = predictDemand().map(demand => demand.toString)
 
     logger.info("Saving submission...")
     val idColumn = if (predictedDemand.size == 1) DenseVector(0.toString) else DenseVector.rangeD(0, predictedDemand.size, 1).map(x => "%.0f".format(x))
@@ -83,16 +82,17 @@ object SubmissionApp extends LazyLogging {
     logger.info("Loading test set...")
     val allTestItemsDAO = AllTrainItemsDAO("/mnt/bimbo/segments/train_9.csv", clientNamesDAO)
     val testItemByProductDAO = ItemByProductDAO(allTestItemsDAO)
-   //  val testItems = testItemByProductDAO.getProductItems(1240)//.filter(i => i.depotId==1387) //getTestItems(trainItemDAO, testItemByProductDAO) //
+    // val testItems = testItemByProductDAO.getProductItems(43000)//.filter(i => i.depotId==1387) // //
     val testItems = allTestItemsDAO.getAllItems()
-
+//val testItems = getTestItems(trainItemDAO, testItemByProductDAO)
+    
     logger.info("Building model...")
     //    val model = GroupByFallbackModel( trainItemDAO)
    //   val model = ClientProductGPModel(trainItemDAO, avgLogWeeklySaleByClientDAO, null)
     //      val model = ClientProductHgprModel(trainItemDAO,avgLogWeeklySaleByClientDAO)
     //      val model = ProductGPModel(trainItemDAO, avgLogWeeklySaleByClientDAO, "target/productGPModelParams.kryo",itemSegmentDAO,segmentGPParamsDAO)
-  val model = SegmentProductModel(trainItemDAO, avgLogWeeklySaleByClientDAO)
-  // val model = KnnGp2Model(trainItemDAO,avgLogWeeklySaleByClientDAO)
+ // val model = SegmentProductModel(trainItemDAO, avgLogWeeklySaleByClientDAO)
+   val model = KnnGp2Model(trainItemDAO,avgLogWeeklySaleByClientDAO)
 
     logger.info("Predicting demand...")
     val predictedDemand = model.predict(testItems) //.map(d => "%.0f".format(d).toDouble)
@@ -104,7 +104,7 @@ object SubmissionApp extends LazyLogging {
     logger.info("Getting product ids for training...")
     val productIds = trainItemDAO.getProductIds().filter { productId =>
       val productSize = trainItemDAO.getProductItems(productId).size
-      productSize < 500 && productSize > 0
+      productSize < 1000 && productSize > 0
     }
     val items = productIds.flatMap(productId => testItemDAO.getProductItems(productId))
     items
@@ -119,7 +119,7 @@ object SubmissionApp extends LazyLogging {
     val avgLogWeeklySaleByClientDAO = AvgLogWeeklySaleDAO("/mnt/bimbo/stats/clientAvgLogWeeklySale_3_9.csv")
 
     logger.info("Loading test set...")
-    val testItems = AllTestItemsDAO("/mnt/daniel/bimbo/test.csv", clientNamesDAO).getAllItems()
+    val testItems = AllTestItemsDAO("/mnt/bimbo/test.csv", clientNamesDAO).getAllItems()
 
     logger.info("Building model...")
     //   val model = ClientProductGPModel(itemDAO, avgLogWeeklySaleByClientDAO, null)

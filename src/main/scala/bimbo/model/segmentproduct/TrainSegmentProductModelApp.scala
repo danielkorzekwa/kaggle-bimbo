@@ -44,7 +44,7 @@ object TrainSegmentProductModelApp {
 
     }.toList//.take(10)
 
-    val covFunc = SegmentProductCovFunc()
+    val covFunc = SegmentProductCovFunc2()
     val covFuncParams = DenseVector(log(1), log(1), log(1), log(1), log(1), log(1),log(1))
     val noiseLogStdDev = log(1)
 

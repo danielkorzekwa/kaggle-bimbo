@@ -7,16 +7,18 @@ import bimbo.data.dao.ClientNamesDAO
 import bimbo.data.dao.ItemByProductDAO
 import smile.neighbor.CoverTree
 import breeze.linalg.DenseVector
-import bimbo.model.knngp2.KnnGP2CovFunc
 import breeze.numerics._
 import bimbo.data.Item
 import bimbo.data.dao.AvgLogWeeklySaleDAO
 import bimbo.model.segmentproduct.util.calcNewProductMap
 import bimbo.model.knngp2.util.FeatureVectorFactory
-import bimbo.model.knngp2.knn.BruteKnn
 import com.typesafe.scalalogging.slf4j.LazyLogging
 import com.typesafe.scalalogging.slf4j.LazyLogging
 import breeze.linalg.DenseMatrix
+import bimbo.model.knngp2.KnnGP2CovFunc2
+import bimbo.model.knngp2.knn.ItemDistance
+import bimbo.model.knngp2.knn.LinearKnn
+import bimbo.model.knngp2.knn.CoverTreeKnn
 
 object CoverTreeApp extends LazyLogging {
 
@@ -25,40 +27,32 @@ object CoverTreeApp extends LazyLogging {
   val testItemByProductDAO = ItemByProductDAO(testItemsDAO)
   val avgLogWeeklySaleDAO = AvgLogWeeklySaleDAO("/mnt/bimbo/stats/clientAvgLogWeeklySale_3_8.csv")
 
-  val testItems = testItemByProductDAO.getProductItems(37360).toArray
+  val testItems = testItemByProductDAO.getProductItems(1240).toArray.take(10000)
 
   val covFuncParams = DenseVector(log(1), log(1), log(1), log(1), log(1), log(1), log(1))
   val noiseLogStdDev = log(1)
-  val covFunc = KnnGP2CovFunc()
+  val covFunc = KnnGP2CovFunc2()
 
   val newProductMap: Map[Item, Boolean] = calcNewProductMap(testItems)
   val featureVectorFactory = FeatureVectorFactory(avgLogWeeklySaleDAO, newProductMap)
 
   def main(args: Array[String]): Unit = {
 
-    
+    logger.info("train data:" + testItems.size)
 
-    val data = (1 to 1).flatMap(i => testItems).map {item =>
-      featureVectorFactory.create(item).toArray
-    }.toArray.take(10000)
-logger.info("train data:" + data.size)
-    
     logger.info("Building knn model...")
-   //  val knnModel = BruteKnn(data, covFunc, covFuncParams, featureVectorFactory)
-
-      val model = new LinearSearch(data, ItemDistance(covFunc,covFuncParams))
-   // val model = new CoverTree(data, ItemDistance(covFunc,covFuncParams))
+    //  val model = BruteKnn2(testItems, covFunc, covFuncParams, featureVectorFactory)
+    val model = LinearKnn(testItems, covFunc, covFuncParams, featureVectorFactory)
+    //val model = new CoverTreeKnn(testItems, covFunc, covFuncParams, featureVectorFactory)
     //model.setIdenticalExcluded(false)
 
     logger.info("Predicting...")
     val now = System.currentTimeMillis()
-    data.take(1).par.foreach { item =>
-      model.knn(item, 100)
-    //   knnModel.getKNN(item, 100)
+    testItems.take(1000).par.foreach { item =>
+      model.getKNN(item, 100)
     }
 
     println(System.currentTimeMillis() - now)
   }
 
-  
 }
