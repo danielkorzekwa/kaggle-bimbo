@@ -1,3 +1,6 @@
+knn gp:
+rmse=0.45564 
+
 segment client (200  + canal,route), no rounding, mult cov :
 rmse=0.45708   
 

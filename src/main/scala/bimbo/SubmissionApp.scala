@@ -58,7 +58,7 @@ object SubmissionApp extends LazyLogging {
     logger.info("Loading test set...")
     val testItemsDAO = AllTrainItemsDAO("c:/perforce/daniel/bimbo/segments/train_9.csv", clientNamesDAO)
     val testItemByProductDAO = ItemByProductDAO(testItemsDAO)
-     val testItems = testItemByProductDAO.getProductItems(43231)
+    val testItems = testItemByProductDAO.getProductItems(43231)
     //val testItems = testItemsDAO.getAllItems()
     val predictedDemand = model.predict(testItems)
 
@@ -74,25 +74,25 @@ object SubmissionApp extends LazyLogging {
     val avgLogWeeklySaleByClientDAO = AvgLogWeeklySaleDAO("/mnt/bimbo/stats/clientAvgLogWeeklySale_3_8.csv")
 
     logger.info("Creating itemSegmentDAO")
-   // val itemSegmentDAO = ItemSegmentDAO("target/segmentByProductClient.kryo")
+    // val itemSegmentDAO = ItemSegmentDAO("target/segmentByProductClient.kryo")
 
     logger.info("Creating segmentGPParamsDAO")
-   // val segmentGPParamsDAO = SegmentGPParamsDAO("target/segmentGPModelParams.kryo")
+    // val segmentGPParamsDAO = SegmentGPParamsDAO("target/segmentGPModelParams.kryo")
 
     logger.info("Loading test set...")
     val allTestItemsDAO = AllTrainItemsDAO("/mnt/bimbo/segments/train_9.csv", clientNamesDAO)
     val testItemByProductDAO = ItemByProductDAO(allTestItemsDAO)
-    // val testItems = testItemByProductDAO.getProductItems(43000)//.filter(i => i.depotId==1387) // //
+  //    val testItems = testItemByProductDAO.getProductItems(43231)//.filter(i => i.depotId==1387) // //
     val testItems = allTestItemsDAO.getAllItems()
-//val testItems = getTestItems(trainItemDAO, testItemByProductDAO)
-    
+    //val testItems = getTestItems(trainItemDAO, testItemByProductDAO)
+
     logger.info("Building model...")
     //    val model = GroupByFallbackModel( trainItemDAO)
-   //   val model = ClientProductGPModel(trainItemDAO, avgLogWeeklySaleByClientDAO, null)
+    //   val model = ClientProductGPModel(trainItemDAO, avgLogWeeklySaleByClientDAO, null)
     //      val model = ClientProductHgprModel(trainItemDAO,avgLogWeeklySaleByClientDAO)
     //      val model = ProductGPModel(trainItemDAO, avgLogWeeklySaleByClientDAO, "target/productGPModelParams.kryo",itemSegmentDAO,segmentGPParamsDAO)
- // val model = SegmentProductModel(trainItemDAO, avgLogWeeklySaleByClientDAO)
-   val model = KnnGp2Model(trainItemDAO,avgLogWeeklySaleByClientDAO)
+    // val model = SegmentProductModel(trainItemDAO, avgLogWeeklySaleByClientDAO)
+    val model = KnnGp2Model(trainItemDAO, avgLogWeeklySaleByClientDAO)
 
     logger.info("Predicting demand...")
     val predictedDemand = model.predict(testItems) //.map(d => "%.0f".format(d).toDouble)

@@ -27,7 +27,7 @@ object CoverTreeApp extends LazyLogging {
   val testItemByProductDAO = ItemByProductDAO(testItemsDAO)
   val avgLogWeeklySaleDAO = AvgLogWeeklySaleDAO("/mnt/bimbo/stats/clientAvgLogWeeklySale_3_8.csv")
 
-  val testItems = testItemByProductDAO.getProductItems(1240).toArray.take(10000)
+  val testItems = testItemByProductDAO.getProductItems(1240).toArray.take(200000)
 
   val covFuncParams = DenseVector(log(1), log(1), log(1), log(1), log(1), log(1), log(1))
   val noiseLogStdDev = log(1)
@@ -42,8 +42,8 @@ object CoverTreeApp extends LazyLogging {
 
     logger.info("Building knn model...")
     //  val model = BruteKnn2(testItems, covFunc, covFuncParams, featureVectorFactory)
-    val model = LinearKnn(testItems, covFunc, covFuncParams, featureVectorFactory)
-    //val model = new CoverTreeKnn(testItems, covFunc, covFuncParams, featureVectorFactory)
+   // val model = LinearKnn(testItems, covFunc, covFuncParams, featureVectorFactory)
+    val model = new CoverTreeKnn(testItems, covFunc, covFuncParams, featureVectorFactory)
     //model.setIdenticalExcluded(false)
 
     logger.info("Predicting...")
