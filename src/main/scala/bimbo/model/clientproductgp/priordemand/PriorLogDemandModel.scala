@@ -11,6 +11,7 @@ import bimbo.data.dao.AvgLogWeeklySaleDAO
 import bimbo.util.StatCounterByKey
 import breeze.stats._
 import bimbo.data.dao.AvgLogDemandByClientDAO
+import dk.gp.gpr.GprPredictEngine
 
 /**
  * Predicts demand from client average sales
@@ -34,7 +35,7 @@ case class PriorLogDemandModel(items: Seq[Item], avgLogWeeklySaleDAO: AvgLogWeek
 
  //     val (x,y) = createAvgLogDemandData(items, avgLogDemandDAO)
     val (x, y) = createSalesDemandData(items, avgLogWeeklySaleDAO)
-    GprModel(x, y, CovSEiso(), DenseVector(log(1), log(1)), log(1))
+    GprPredictEngine(GprModel(x, y, CovSEiso(), DenseVector(log(1), log(1)), log(1)))
     //   GprModel(x, y, CovSEiso(), DenseVector(2.167843777084265, 2.5015536901699758), -1.375299,mean(y))
   }
 
@@ -45,7 +46,7 @@ case class PriorLogDemandModel(items: Seq[Item], avgLogWeeklySaleDAO: AvgLogWeek
   
   def predictLogDemand(clientId:Int): Double = {
        val priorLogDemand2 = avgLogWeeklySaleDAO.getAvgLogWeeklySaleForClient(clientId) match {
-      case Some(avgLogWeeklySale) if (itemsSize > 0) => gprPredict(DenseMatrix(avgLogWeeklySale), gprModel)(0, 0)
+      case Some(avgLogWeeklySale) if (itemsSize > 0) => gprModel.predictMean(DenseMatrix(avgLogWeeklySale))(0)
       case _                                         => priorLogDemand
 
     }

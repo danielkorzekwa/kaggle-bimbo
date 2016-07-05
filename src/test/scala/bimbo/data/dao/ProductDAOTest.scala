@@ -10,7 +10,7 @@ import bimbo.data.PgProductDetails
 class ProductDAOTest {
   
   @Test def test():Unit ={
-    val productDAO = ProductDAO2("c:/perforce/daniel/bimbo/producto_tabla.csv")
+    val productDAO = ProductDAO("c:/perforce/daniel/bimbo/producto_tabla.csv")
  
 val products = productDAO.getProductMap().values.toList.filter(p => p.isInstanceOf[PgProductDetails])
 println(products.size)

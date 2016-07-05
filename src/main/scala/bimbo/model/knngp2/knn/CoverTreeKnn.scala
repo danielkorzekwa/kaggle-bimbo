@@ -26,10 +26,15 @@ case class CoverTreeKnn(trainSet: Array[Item], covFunc: CovFunc, covFuncParams: 
       val point = KnnPoint(featureVectorFactory.create(item), item.demand)
       val p = model.knn(point, k)
       val knnPoints = p.map(_.value)
-
+      if(knnPoints.size ==100) {
+      //  println(knnPoints.size)
+        knnPoints
+      }
+      else {
       val linearModel = new LinearSearch(knnPoints, ItemDistance(covFunc, covFuncParams))
       linearModel.setIdenticalExcluded(false)
       linearModel.knn(point, k).map(_.value)
+      }
     }
   }
 }

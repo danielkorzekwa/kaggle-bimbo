@@ -11,5 +11,4 @@ case class ClientLinkedModel(productMap: Map[Int, ProductDetails],trainItemByPgP
     avgLogWeeklySaleByClientDAO: AvgLogWeeklySaleDAO, trainItemDAO: ItemByProductDAO) 
     extends LinkedDemandModel(productMap,trainItemByPgProductDAO,avgLogWeeklySaleByClientDAO,trainItemDAO){
   
-   def predictProductDemand(productId: Int, productItems: Seq[Item]): Seq[(Item, Double)] = ???
 }

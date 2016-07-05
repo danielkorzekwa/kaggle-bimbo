@@ -1,36 +1,26 @@
-package bimbo.linkedmodel
+package bimbo.model.knnproductlink
 
-import breeze.linalg.DenseVector
+import bimbo.model.DemandModel
 import bimbo.data.Item
-import bimbo.data.dao.ProductDAO
+import bimbo.data.PgProductDetails
 import bimbo.data.ProductDetails
-import bimbo.data.PgProductDetails
+import breeze.linalg.DenseVector
 import bimbo.data.GenericProductDetails
-import bimbo.data.PgProductDetails
-import bimbo.data.PgProductDetails
-import bimbo.data.PgProductDetails
-import bimbo.data.PgProductDetails
-import bimbo.data.PgProductDetails
-import bimbo.data.GenericProductDetails
-import bimbo.data.GenericProductDetails
-import bimbo.data.PgProductDetails
-import bimbo.data.PgProductDetails
-import bimbo.data.dao.ItemByPgProductDAO
-import bimbo.data.dao.AvgLogWeeklySaleDAO
-import bimbo.linkedmodel.client.ClientModel2
-import com.typesafe.scalalogging.slf4j.LazyLogging
 import java.util.concurrent.atomic.AtomicInteger
-import bimbo.data.dao.allitems.AllItemsDAO
 import bimbo.model.clientproductgp.ClientProductGPModel
+import com.typesafe.scalalogging.slf4j.LazyLogging
 import bimbo.data.dao.ItemByProductDAO
+import bimbo.data.dao.AvgLogWeeklySaleDAO
+import bimbo.model.knngp2.KnnGp2Model
+import bimbo.linkedmodel.client.ClientModel2
+import bimbo.data.dao.ItemByPgProductDAO
+import bimbo.model.knngp2.knnGpPredict
 
-abstract class LinkedDemandModel(productMap: Map[Int, ProductDetails], trainItemByPgProductDAO: ItemByPgProductDAO, avgLogWeeklySaleByClientDAO: AvgLogWeeklySaleDAO,
-    trainItemDAO: ItemByProductDAO)
-    extends LazyLogging {
-
+case class KnnProductLinkModel(productMap: Map[Int, ProductDetails], trainItemDAO: ItemByProductDAO,avgLogWeeklySaleByClientDAO: AvgLogWeeklySaleDAO,
+    trainItemByPgProductDAO: ItemByPgProductDAO) extends LazyLogging {
+  
   def predict(testItems: Seq[Item]): DenseVector[Double] = {
-
-    val pgTestItems = testItems.filter(item => productMap(item.productId).isInstanceOf[PgProductDetails])
+     val pgTestItems = testItems.filter(item => productMap(item.productId).isInstanceOf[PgProductDetails])
     val genericTestItems = testItems.filter(item => productMap(item.productId).isInstanceOf[GenericProductDetails])
 
     val predictedDemandGP = predictPG(pgTestItems)
@@ -40,10 +30,9 @@ abstract class LinkedDemandModel(productMap: Map[Int, ProductDetails], trainItem
     val predictedDemand = DenseVector(testItems.map(i => predictedDemandByItem(i)).toArray)
     predictedDemand
   }
-
+  
   def predictPG(testItems: Seq[Item]): Seq[(Item, Double)] = {
-
-    val testItemsByProduct = testItems.groupBy { item => productMap(item.productId) }
+     val testItemsByProduct = testItems.groupBy { item => productMap(item.productId) }
 
     val i = new AtomicInteger(1)
     val predictedDemand = testItemsByProduct.toList.par.flatMap {
@@ -53,15 +42,14 @@ abstract class LinkedDemandModel(productMap: Map[Int, ProductDetails], trainItem
          if (i.getAndIncrement % 1 == 0) logger.info(
              "Predicting pgProduct %d/%d, trainSize/testSize=%d/%d, product=%s".format(i.get, testItemsByProduct.size, trainItems.size,testItems.size,productDetails))
      
-        val clientModel = ClientModel2(avgLogWeeklySaleByClientDAO)
-        clientModel.predictDemand(trainItems, testItems)
+             knnGpPredict(trainItems.toArray,testItems,avgLogWeeklySaleByClientDAO)
 
     }.toList
 
     predictedDemand
   }
-
-  def predictGeneric(testItems: Seq[Item]): Seq[(Item, Double)] = {
+  
+   def predictGeneric(testItems: Seq[Item]): Seq[(Item, Double)] = {
 
     val testItemsByProduct = testItems.groupBy { i => i.productId }
 
@@ -69,10 +57,11 @@ abstract class LinkedDemandModel(productMap: Map[Int, ProductDetails], trainItem
     val predictedDemand = testItemsByProduct.toList.par.flatMap {
       case (productId, productItems) =>
         if (i.getAndIncrement % 10 == 0) logger.info("Predicting product %d/%d".format(i.get, testItemsByProduct.size))
-        ClientProductGPModel(trainItemDAO, avgLogWeeklySaleByClientDAO,null)predictProductDemand(productId, productItems)
+        //ClientProductGPModel(trainItemDAO, avgLogWeeklySaleByClientDAO,null).predictProductDemand(productId, productItems)
+        
+        KnnGp2Model(trainItemDAO,avgLogWeeklySaleByClientDAO).predictProductDemand(productId, productItems)
     }.toList
 
     predictedDemand
   }
-
 }

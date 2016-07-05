@@ -20,6 +20,7 @@ import dk.gp.cov.CovSEiso
 import bimbo.data.dao.ItemByProductDAO
 import bimbo.data.dao.AvgLogDemandByClientDAO
 import dk.gp.gpr.gprPredict
+import dk.gp.gpr.GprPredictEngine
 
 case class ClientProductGPModel(trainItemDAO: ItemByProductDAO, avgLogWeeklySaleByClientDAO: AvgLogWeeklySaleDAO,
     avgLogDemandDAO:AvgLogDemandByClientDAO)
@@ -45,7 +46,7 @@ case class ClientProductGPModel(trainItemDAO: ItemByProductDAO, avgLogWeeklySale
         case Some(gpModel)  => {
           
           val x = extractFeatureVec(item).toDenseMatrix
-          val logDemand = gprPredict(x, gpModel)(0, 0)
+          val logDemand = gpModel.predictMean(x)(0)
          
           logDemand
         }
@@ -60,7 +61,7 @@ case class ClientProductGPModel(trainItemDAO: ItemByProductDAO, avgLogWeeklySale
     predictedProductDemand
   }
 
-  private def createGprModel(items: Seq[Item], demandMean: Double): GprModel = {
+  private def createGprModel(items: Seq[Item], demandMean: Double): GprPredictEngine = {
     val x = extractFeatureVec(items)
     val y = DenseVector(items.map(i => log(i.demand + 1)).toArray)
 
@@ -76,7 +77,7 @@ case class ClientProductGPModel(trainItemDAO: ItemByProductDAO, avgLogWeeklySale
 //        val covFunc = CovSEiso()
 //    val covFuncParams = DenseVector(-1.5659136180331088, 0.0)
 //    val noiseLogStdDev = -0.619037
-    GprModel(x, y, covFunc, covFuncParams, noiseLogStdDev, mean = demandMean)
+    GprPredictEngine(GprModel(x, y, covFunc, covFuncParams, noiseLogStdDev, mean = demandMean))
   }
 
   private def getKey(item: Item): (Int, Int) = (item.clientId, item.productId)

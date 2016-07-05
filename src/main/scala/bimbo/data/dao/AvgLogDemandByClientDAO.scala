@@ -14,7 +14,7 @@ case class AvgLogDemandByClientDAO(dataFile:String) {
     val avgLogDemandByClient: Map[Int, Double] = (0 until avgLogDemandData.rows).map{i =>
       
       val clientId = avgLogDemandData(i, 0).toInt 
-      val logAvgSale = "%.1f".format(avgLogDemandData(i, 1)).toDouble
+      val logAvgSale = avgLogDemandData(i, 1)//"%.6f".format(avgLogDemandData(i, 1)).toDouble
       
       clientId -> logAvgSale
   }.toMap
