@@ -1,8 +1,9 @@
-package bimbo
+
 
 import org.apache.spark.SparkConf
 import org.apache.spark.SparkContext
 import scala.collection._
+import org.apache.spark.rdd.RDD.rddToPairRDDFunctions
 
 object SparkTestApp {
   

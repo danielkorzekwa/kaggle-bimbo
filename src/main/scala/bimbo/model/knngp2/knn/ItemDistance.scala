@@ -19,11 +19,12 @@ case class ItemDistance(covFunc: CovFunc, covFuncParams: DenseVector[Double]) ex
 
     val d0 = p1.x(0) - p2.x(0)
     //  val d1 = if (p1.x(1) == p2.x(1)) 0.0 else oneByellell
-    val d2 = if (p1.x(2) == p2.x(2)) 0.0 else oneByellell
-    val d3 = if (p1.x(3) == p2.x(3)) 0.0 else oneByellell
-    val d4 = if (p1.x(4) == p2.x(4)) 0.0 else oneByellell
-
-    (d0 * d0) / ellell + d2 + d3 + d4
+    val d2 = if (p1.x(2) == p2.x(2)) 0.0 else 1
+    val d3 = if (p1.x(3) == p2.x(3)) 0.0 else 1
+    val d4 = if (p1.x(4) == p2.x(4)) 0.0 else 1
+    // val d5 = if (p1.x(5) == p2.x(5)) 0.0 else oneByellell
+    //val d6 = if (p1.x(6) == p2.x(6)) 0.0 else oneByellell
+    ((d0 * d0) + d2 + d3 + d4)/ellell
   }
 
 }

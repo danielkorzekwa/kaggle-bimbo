@@ -27,9 +27,9 @@ object ScoreEvalApp extends LazyLogging {
     val allTestItemsDAO = AllTrainItemsDAO("/mnt/bimbo/segments/train_9.csv", clientNamesDAO)
     val testItemByProductDAO = ItemByProductDAO(allTestItemsDAO)
 
-   // val testItems = testItemByProductDAO.getProductItems(40931)//.filter(i => i.depotId==1387) //getTestwItems(trainItemDAO, testItemByProductDAO)//testItemByProductDAO.getProductItems(1278)// //testItemByProductDAO.getProductItems(43175) 
+    val testItems = testItemByProductDAO.getProductItems(37360)//.filter(i => i.depotId==1387) //getTestwItems(trainItemDAO, testItemByProductDAO)//testItemByProductDAO.getProductItems(1278)// //testItemByProductDAO.getProductItems(43175) 
    //val testItems = getTestItems(trainItemDAO, testItemByProductDAO)
-       val testItems = allTestItemsDAO.getAllItems()
+     //  val testItems = allTestItemsDAO.getAllItems()
 
     val predictionData = csvread(new File("target/submission.csv"), skipLines = 1)
 

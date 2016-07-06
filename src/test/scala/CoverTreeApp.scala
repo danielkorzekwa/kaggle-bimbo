@@ -19,6 +19,7 @@ import bimbo.model.knngp2.KnnGP2CovFunc2
 import bimbo.model.knngp2.knn.ItemDistance
 import bimbo.model.knngp2.knn.LinearKnn
 import bimbo.model.knngp2.knn.CoverTreeKnn
+import bimbo.data.dao.townstate.TownStateDAO
 
 object CoverTreeApp extends LazyLogging {
 
@@ -26,7 +27,8 @@ object CoverTreeApp extends LazyLogging {
   val testItemsDAO = AllTrainItemsDAO("/mnt/bimbo/segments/train_3_to_8.csv", clientNamesDAO)
   val testItemByProductDAO = ItemByProductDAO(testItemsDAO)
   val avgLogWeeklySaleDAO = AvgLogWeeklySaleDAO("/mnt/bimbo/stats/clientAvgLogWeeklySale_3_8.csv")
-
+val townStateMap = TownStateDAO("/mnt/bimbo/town_state.csv").getTownStateMap()
+  
   val testItems = testItemByProductDAO.getProductItems(1240).toArray.take(400000)
 
   val covFuncParams = DenseVector(log(1), log(1), log(1), log(1), log(1), log(1), log(1))
@@ -34,7 +36,7 @@ object CoverTreeApp extends LazyLogging {
   val covFunc = KnnGP2CovFunc2()
 
   val newProductMap: Map[Item, Boolean] = calcNewProductMap(testItems)
-  val featureVectorFactory = FeatureVectorFactory(avgLogWeeklySaleDAO, newProductMap)
+  val featureVectorFactory = FeatureVectorFactory(avgLogWeeklySaleDAO, newProductMap,townStateMap)
 
   def main(args: Array[String]): Unit = {
 

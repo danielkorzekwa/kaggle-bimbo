@@ -16,20 +16,37 @@ import breeze.stats._
 import breeze.linalg.DenseMatrix
 import breeze.linalg._
 import bimbo.model.knngp2.knn.LinearKnn
+import bimbo.data.dao.townstate.TownState
 
-object knnGpPredict extends LazyLogging{
-  
-   val covFuncParams = DenseVector(log(1), log(1), log(1), log(1), log(1), log(1), log(1))
+object knnGpPredict extends LazyLogging {
+
+  val covFuncParams = DenseVector(log(2), log(1.6))
   val noiseLogStdDev = log(1)
-  val covFunc = KnnGP2CovFunc2()
+
+  //train 43231
+  // val covFuncParams = DenseVector(-0.3340343076151246, 0.5913907578507006)
+  //val noiseLogStdDev = -1.019753
+
+  //train 37360 learn twice
+  //  val covFuncParams = DenseVector(-0.9298206557839559, 0.1328678699035759)
+  //val noiseLogStdDev = -0.961749
   
-  def apply(trainProductItems:Array[Item],testProductItems:Seq[Item],avgLogWeeklySaleDAO: AvgLogWeeklySaleDAO):Seq[(Item, Double)] = {
-     
+  //train 37360
+    //val covFuncParams = DenseVector(-0.8712092877024353, 0.17592488028072195)
+ // val noiseLogStdDev = -0.964787
+
+  // val covFuncParams = DenseVector(log(1), log(1))
+  // val noiseLogStdDev = log(1)
+  val covFunc = KnnGP2CovFunc2()
+
+  def apply(trainProductItems: Array[Item], testProductItems: Seq[Item], avgLogWeeklySaleDAO: AvgLogWeeklySaleDAO,
+            townStateMap: Map[Int, TownState]): Seq[(Item, Double)] = {
+
     logger.info("Train/test size= %d/%d".format(trainProductItems.size, testProductItems.size))
 
     val trainAndTestItems = trainProductItems ++ testProductItems
     val newProductMap: Map[Item, Boolean] = calcNewProductMap(trainAndTestItems)
-    val featureVectorFactory = FeatureVectorFactory(avgLogWeeklySaleDAO, newProductMap)
+    val featureVectorFactory = FeatureVectorFactory(avgLogWeeklySaleDAO, newProductMap, townStateMap)
 
     val y = DenseVector(trainProductItems.map(i => log(i.demand + 1)).toArray)
     val meanLogDemand = mean(y)
@@ -44,7 +61,7 @@ object knnGpPredict extends LazyLogging{
       predictedProductDemand
     } else {
       val knnModel = CoverTreeKnn(trainProductItems, covFunc, covFuncParams, featureVectorFactory)
-     //   val knnModel = LinearKnn(trainProductItems, covFunc, covFuncParams, featureVectorFactory)
+      //   val knnModel = LinearKnn(trainProductItems, covFunc, covFuncParams, featureVectorFactory)
 
       var i = new AtomicInteger(1)
       val testSize = testProductItems.size
@@ -70,8 +87,8 @@ object knnGpPredict extends LazyLogging{
 
     predictedProductDemand
   }
-   
-    def meanFunc(x: DenseMatrix[Double], meanLogDemand: Double): DenseVector[Double] = {
+
+  def meanFunc(x: DenseMatrix[Double], meanLogDemand: Double): DenseVector[Double] = {
     val meanVec = x(*, ::).map { x =>
       val clientId = x(1).toInt
       //  priorDemandModel.predictLogDemand(clientId)
