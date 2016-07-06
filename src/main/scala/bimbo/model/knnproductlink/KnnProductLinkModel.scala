@@ -35,7 +35,7 @@ case class KnnProductLinkModel(productMap: Map[Int, ProductDetails], trainItemDA
      val testItemsByProduct = testItems.groupBy { item => productMap(item.productId) }
 
     val i = new AtomicInteger(1)
-    val predictedDemand = testItemsByProduct.toList.par.flatMap {
+    val predictedDemand = testItemsByProduct.toList.flatMap {
       case (productDetails: PgProductDetails, testItems) =>
        
         val trainItems = trainItemByPgProductDAO.getProductItems(productDetails)
@@ -44,7 +44,7 @@ case class KnnProductLinkModel(productMap: Map[Int, ProductDetails], trainItemDA
      
              knnGpPredict(trainItems.toArray,testItems,avgLogWeeklySaleByClientDAO)
 
-    }.toList
+    }
 
     predictedDemand
   }
@@ -54,13 +54,13 @@ case class KnnProductLinkModel(productMap: Map[Int, ProductDetails], trainItemDA
     val testItemsByProduct = testItems.groupBy { i => i.productId }
 
     val i = new AtomicInteger(1)
-    val predictedDemand = testItemsByProduct.toList.par.flatMap {
+    val predictedDemand = testItemsByProduct.toList.flatMap {
       case (productId, productItems) =>
         if (i.getAndIncrement % 10 == 0) logger.info("Predicting product %d/%d".format(i.get, testItemsByProduct.size))
         //ClientProductGPModel(trainItemDAO, avgLogWeeklySaleByClientDAO,null).predictProductDemand(productId, productItems)
         
         KnnGp2Model(trainItemDAO,avgLogWeeklySaleByClientDAO).predictProductDemand(productId, productItems)
-    }.toList
+    }
 
     predictedDemand
   }
