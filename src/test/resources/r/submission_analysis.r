@@ -5,9 +5,9 @@ library(ggplot2)
 train_all <- fread('./segments/train_3_to_8.csv')
 test_all <- fread('./segments/train_9.csv')
 
-test <- test_all[Producto_ID==43231]
-s_1 <- fread('prediction_analysis/submission_best.csv')
-s_2 <- fread('prediction_analysis/submission_new.csv')
+test <- test_all
+s_1 <- fread('prediction_analysis/submission_linked_p_pg.csv')
+s_2 <- fread('prediction_analysis/submission_knngp_exclude_client_id.csv')
 
 #compute se
 test$pred1 <- s_1$Demanda_uni_equil

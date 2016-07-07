@@ -17,7 +17,7 @@ import bimbo.model.knngp2.knnGpPredict
 import bimbo.data.dao.townstate.TownState
 
 case class KnnProductLinkModel(productMap: Map[Int, ProductDetails], trainItemDAO: ItemByProductDAO, avgLogWeeklySaleByClientDAO: AvgLogWeeklySaleDAO,
-                               trainItemByPgProductDAO: ItemByPgProductDAO, townStateMap: Map[Int, TownState]) extends LazyLogging {
+                               trainItemByPgProductDAO: ItemByPgProductDAO, townStateMap: Map[Int, TownState],clientNameMap:Map[Int,Int]  ) extends LazyLogging {
 
   def predict(testItems: Seq[Item]): DenseVector[Double] = {
 
@@ -43,7 +43,7 @@ case class KnnProductLinkModel(productMap: Map[Int, ProductDetails], trainItemDA
         if (i.getAndIncrement % 1 == 0) logger.info(
           "Predicting pgProduct %d/%d, trainSize/testSize=%d/%d, product=%s".format(i.get, testItemsByProduct.size, trainItems.size, testItems.size, productDetails))
 
-        knnGpPredict(trainItems.toArray, testItems, avgLogWeeklySaleByClientDAO, townStateMap)
+        knnGpPredict(trainItems.toArray, testItems, avgLogWeeklySaleByClientDAO, townStateMap,clientNameMap)
 
     }
 
@@ -61,7 +61,7 @@ case class KnnProductLinkModel(productMap: Map[Int, ProductDetails], trainItemDA
         //ClientProductGPModel(trainItemDAO, avgLogWeeklySaleByClientDAO,null).predictProductDemand(productId, productItems)
 
         val trainProductItems = trainItemDAO.getProductItems(productId).toArray
-        knnGpPredict(trainProductItems, productItems, avgLogWeeklySaleByClientDAO, townStateMap)
+        knnGpPredict(trainProductItems, productItems, avgLogWeeklySaleByClientDAO, townStateMap,clientNameMap)
     }
 
     predictedDemand

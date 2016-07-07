@@ -1,5 +1,8 @@
-knn_gp(exclusing client_id from knn distance) + linked product
-rmse=0.45424 
+knn_gp(exclusing client_id from knn distance) + linked product (p + pg)
+rmse=0.45374 
+
+knn_gp(exclusing client_id from knn distance) + linked product (pg)
+rmse=0.45424 --------LB 0.45092
 
 knn_gp(eclusing client_id from knn distance)
 rmse=0.45597 

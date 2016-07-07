@@ -6,7 +6,9 @@ import breeze.linalg.DenseVector
 import breeze.linalg.DenseMatrix
 import bimbo.data.dao.townstate.TownState
 
-case class FeatureVectorFactory(avgLogWeeklySaleDAO: AvgLogWeeklySaleDAO, newProductMap: Map[Item, Boolean],townStateMap:Map[Int,TownState]) {
+case class FeatureVectorFactory(avgLogWeeklySaleDAO: AvgLogWeeklySaleDAO, newProductMap: Map[Item, Boolean],townStateMap:Map[Int,TownState],
+clientNameMap:Map[Int,Int]    
+) {
 
   def create(item: Item): DenseVector[Double] = {
     val clientLogSale = avgLogWeeklySaleDAO.getAvgLogWeeklySaleForClient(item.clientId).getOrElse(5.54149)
@@ -24,7 +26,9 @@ case class FeatureVectorFactory(avgLogWeeklySaleDAO: AvgLogWeeklySaleDAO, newPro
     val isNewProduct = if(newProductMap(item)) 1.0 else 0.0
     //val townId = townStateMap(item.depotId).townId
      // val stateId = townStateMap(item.depotId).stateId
-  //  DenseVector(clientLogSale, item.clientId, townId, item.channelId, item.routeId,isNewProduct)
-    DenseVector(clientLogSale, item.clientId, item.depotId, item.channelId, item.routeId,isNewProduct)
+    val clientNameId = clientNameMap(item.clientId)
+    
+    DenseVector(clientLogSale, item.clientId, item.depotId, item.channelId, item.routeId,clientNameId)
+   // DenseVector(clientLogSale, item.clientId, item.depotId, item.channelId, item.routeId,isNewProduct)
   }
 }

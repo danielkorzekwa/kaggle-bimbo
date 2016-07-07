@@ -14,7 +14,7 @@ case class AvgLogWeeklySaleDAO(dataFile:String) {
     val avgLogWeeklySaleByClient: Map[Int, Double] = (0 until clientAvgLogWeeklySale.rows).map{i =>
       
       val clientId = clientAvgLogWeeklySale(i, 0).toInt 
-      val logAvgSale = "%.1f".format(clientAvgLogWeeklySale(i, 1)).toDouble
+      val logAvgSale = clientAvgLogWeeklySale(i, 1)//"%.1f".format(clientAvgLogWeeklySale(i, 1)).toDouble
       
       clientId -> logAvgSale
   }.toMap

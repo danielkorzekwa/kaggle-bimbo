@@ -1,4 +1,4 @@
-package bimbo.model.segmentproduct.util
+package bimbo.model.knngp2.util
 
 import scala.collection.mutable.HashSet
 import bimbo.data.Item

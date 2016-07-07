@@ -9,6 +9,7 @@ import bimbo.data.Item
 import breeze.linalg.DenseMatrix
 import breeze.linalg._
 import dk.gp.util.csvwrite
+import bimbo.model.knngp2.util.calcNewProductMap
 
 class calcNewProductMapTest {
 

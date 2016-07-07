@@ -22,6 +22,7 @@ import bimbo.data.dao.AvgLogDemandByClientDAO
 import bimbo.model.segmentproduct.SegmentProductModel
 import bimbo.model.knnproductlink.KnnProductLinkModel
 import bimbo.data.dao.townstate.TownStateDAO
+import bimbo.data.dao.clientname.ClientNameDAO
 
 object SubmissionApp extends LazyLogging {
 
@@ -53,6 +54,7 @@ object SubmissionApp extends LazyLogging {
     val avgLogWeeklySaleByClientDAO = AvgLogWeeklySaleDAO("/mnt/bimbo/stats/clientAvgLogWeeklySale_3_8.csv")
 
     val townStateMap = TownStateDAO("/mnt/bimbo/town_state.csv").getTownStateMap()
+    val clientNameIdMap = ClientNameDAO("/mnt/bimbo/cliente_tabla.csv").getClientNameIdMap()
     
     logger.info("Loading test set...")
     val allTestItemsDAO = AllTrainItemsDAO("/mnt/bimbo/segments/train_9.csv", clientNamesDAO)
@@ -67,7 +69,7 @@ object SubmissionApp extends LazyLogging {
     //      val model = ClientProductHgprModel(trainItemDAO,avgLogWeeklySaleByClientDAO)
     // val model = SegmentProductModel(trainItemDAO, avgLogWeeklySaleByClientDAO)
     // val model = KnnGp2Model(trainItemDAO, avgLogWeeklySaleByClientDAO)
-    val model = KnnProductLinkModel(productMap, trainItemDAO, avgLogWeeklySaleByClientDAO, trainItemByPgProductDAO,townStateMap)
+    val model = KnnProductLinkModel(productMap, trainItemDAO, avgLogWeeklySaleByClientDAO, trainItemByPgProductDAO,townStateMap,clientNameIdMap)
     logger.info("Predicting demand...")
     val predictedDemand = model.predict(testItems) //.map(d => "%.0f".format(d).toDouble)
 
@@ -93,6 +95,7 @@ object SubmissionApp extends LazyLogging {
       val productMap = ProductDAO("/mnt/bimbo/producto_tabla.csv").getProductMap()
     val avgLogWeeklySaleByClientDAO = AvgLogWeeklySaleDAO("/mnt/bimbo/stats/clientAvgLogWeeklySale_3_9.csv")
  val townStateMap = TownStateDAO("/mnt/bimbo/town_state.csv").getTownStateMap()
+     val clientNameIdMap = ClientNameDAO("/mnt/bimbo/cliente_tabla.csv").getClientNameIdMap()
     
       val trainItemByPgProductDAO = ItemByPgProductDAO(allItemsDAO, productMap)
     
@@ -102,7 +105,7 @@ object SubmissionApp extends LazyLogging {
     logger.info("Building model...")
     //   val model = ClientProductGPModel(itemDAO, avgLogWeeklySaleByClientDAO, null)
     //val model = SegmentProductModel(itemDAO, avgLogWeeklySaleByClientDAO)
-    val model = KnnProductLinkModel(productMap, itemDAO, avgLogWeeklySaleByClientDAO, trainItemByPgProductDAO,townStateMap)
+    val model = KnnProductLinkModel(productMap, itemDAO, avgLogWeeklySaleByClientDAO, trainItemByPgProductDAO,townStateMap,clientNameIdMap)
     logger.info("Predicting demand...")
     val predictedDemand = model.predict(testItems)
 

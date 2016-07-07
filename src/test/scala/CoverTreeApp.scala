@@ -10,7 +10,7 @@ import breeze.linalg.DenseVector
 import breeze.numerics._
 import bimbo.data.Item
 import bimbo.data.dao.AvgLogWeeklySaleDAO
-import bimbo.model.segmentproduct.util.calcNewProductMap
+import bimbo.model.knngp2.util.calcNewProductMap
 import bimbo.model.knngp2.util.FeatureVectorFactory
 import com.typesafe.scalalogging.slf4j.LazyLogging
 import com.typesafe.scalalogging.slf4j.LazyLogging
@@ -20,6 +20,7 @@ import bimbo.model.knngp2.knn.ItemDistance
 import bimbo.model.knngp2.knn.LinearKnn
 import bimbo.model.knngp2.knn.CoverTreeKnn
 import bimbo.data.dao.townstate.TownStateDAO
+import bimbo.data.dao.clientname.ClientNameDAO
 
 object CoverTreeApp extends LazyLogging {
 
@@ -28,7 +29,8 @@ object CoverTreeApp extends LazyLogging {
   val testItemByProductDAO = ItemByProductDAO(testItemsDAO)
   val avgLogWeeklySaleDAO = AvgLogWeeklySaleDAO("/mnt/bimbo/stats/clientAvgLogWeeklySale_3_8.csv")
 val townStateMap = TownStateDAO("/mnt/bimbo/town_state.csv").getTownStateMap()
-  
+    val clientNameIdMap = ClientNameDAO("/mnt/bimbo/cliente_tabla.csv").getClientNameIdMap()
+   
   val testItems = testItemByProductDAO.getProductItems(1240).toArray.take(400000)
 
   val covFuncParams = DenseVector(log(1), log(1), log(1), log(1), log(1), log(1), log(1))
@@ -36,7 +38,7 @@ val townStateMap = TownStateDAO("/mnt/bimbo/town_state.csv").getTownStateMap()
   val covFunc = KnnGP2CovFunc2()
 
   val newProductMap: Map[Item, Boolean] = calcNewProductMap(testItems)
-  val featureVectorFactory = FeatureVectorFactory(avgLogWeeklySaleDAO, newProductMap,townStateMap)
+  val featureVectorFactory = FeatureVectorFactory(avgLogWeeklySaleDAO, newProductMap,townStateMap,clientNameIdMap)
 
   def main(args: Array[String]): Unit = {
 
