@@ -20,6 +20,7 @@ import breeze.linalg.DenseMatrix
 import scala.util.Random
 import bimbo.data.dao.clientname.ClientNameDAO
 import bimbo.data.dao.townstate.TownStateDAO
+import bimbo.model.knngp2.KnnARDCovFunc
 
 object TrainKnnProductLinkModelApp {
 
@@ -39,8 +40,9 @@ val clientNameIdMap = ClientNameDAO("/mnt/bimbo/cliente_tabla.csv").getClientNam
   val newProductMap: Map[Item, Boolean] = calcNewProductMap(trainItems)
   val featureVectorFactory = FeatureVectorFactory(avgLogWeeklySaleDAO, newProductMap, townStateMap,clientNameIdMap)
 
-  val covFunc = KnnGP2CovFunc2()
-  val covFuncParams = DenseVector(log(1), log(1))
+  val covFunc = KnnARDCovFunc()
+  //val covFuncParams = DenseVector(log(1), log(1))
+  val covFuncParams = DenseVector(log(1), log(1),log(1), log(1),log(1), log(1))
   val noiseLogStdDev = log(1)
 
   def main(args: Array[String]): Unit = {
@@ -48,9 +50,9 @@ val clientNameIdMap = ClientNameDAO("/mnt/bimbo/cliente_tabla.csv").getClientNam
     val y = DenseVector(trainItems.map(i => log(i.demand + 1)).toArray)
     val meanLogDemand = mean(y)
 
-    val knnModel = CoverTreeKnn(trainItems.toArray, covFunc, covFuncParams, featureVectorFactory)
+    val knnModel = CoverTreeKnn(trainItems.toArray,  featureVectorFactory)
 
-    val data = Random.shuffle(trainItems).take(100).map { item =>
+    val data = new Random(3450).shuffle(trainItems).take(1000).map { item =>
 
       val trainItems = knnModel.getKNN(item, 100)
       val xKnn = DenseVector.horzcat(trainItems.map(_.x): _*).t

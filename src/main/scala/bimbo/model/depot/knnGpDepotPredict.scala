@@ -1,4 +1,4 @@
-package bimbo.model.knngp2
+package bimbo.model.depot
 
 import bimbo.data.dao.AvgLogWeeklySaleDAO
 import bimbo.data.Item
@@ -18,45 +18,24 @@ import breeze.linalg._
 import bimbo.model.knngp2.knn.LinearKnn
 import bimbo.data.dao.townstate.TownState
 
-object knnGpPredict extends LazyLogging {
+object knnGpDepotPredict extends LazyLogging {
 
- // val covFuncParams = DenseVector(log(2), log(1.6))
- // val noiseLogStdDev = log(1)
-  
-   val covFuncParams = DenseVector(-0.894756504231915, 0.3201485586333824, 0.13164100423644592, 0.12565956549127408, -0.03811224392520848, 0.39061715410444836)
-  val noiseLogStdDev = -0.964483
+  val covFuncParams = DenseVector(log(2), log(1.6))
+  val noiseLogStdDev = log(1)
 
-  
-  
-  //train 37360
-//    val covFuncParams = DenseVector(-0.7792494135378841, 0.4106733917231454)
-//  val noiseLogStdDev = -0.936649
+  val covFunc = DepotCovFunc()
 
-  
-  val covFunc = KnnARDCovFunc()
+  def apply(knnModel: CoverTreeDepot, trainSize: Int, testProductItems: Seq[Item], avgLogWeeklySaleDAO: AvgLogWeeklySaleDAO,
+            townStateMap: Map[Int, TownState], clientNameMap: Map[Int, Int],
+            featureVectorFactory: FeatureVectorDepotFactory, priorDemandModel: PriorLogDemandModel,
+            meanLogDemand: Double): Seq[(Item, Double)] = {
 
-  def apply(trainProductItems: Array[Item], testProductItems: Seq[Item], avgLogWeeklySaleDAO: AvgLogWeeklySaleDAO,
-            townStateMap: Map[Int, TownState],clientNameMap:Map[Int,Int]   ): Seq[(Item, Double)] = {
-
-    logger.info("Train/test size= %d/%d".format(trainProductItems.size, testProductItems.size))
-
-    val trainAndTestItems = trainProductItems ++ testProductItems
-    val newProductMap: Map[Item, Boolean] = calcNewProductMap(trainAndTestItems)
-    val featureVectorFactory = FeatureVectorFactory(avgLogWeeklySaleDAO, newProductMap, townStateMap,clientNameMap)
-
-    val y = DenseVector(trainProductItems.map(i => log(i.demand + 1)).toArray)
-    val meanLogDemand = mean(y)
-
-    val priorDemandModel = PriorLogDemandModel(trainProductItems, avgLogWeeklySaleDAO, null)
-
-    val trainSize = trainProductItems.size
     val predictedProductDemand = if (trainSize == 0) {
       val predictedProductDemand = testProductItems.par.map { testItem =>
         (testItem, exp(priorDemandModel.predictLogDemand(testItem)) - 1)
       }.toList
       predictedProductDemand
     } else {
-      val knnModel = CoverTreeKnn(trainProductItems,  featureVectorFactory)
 
       var i = new AtomicInteger(1)
       val testSize = testProductItems.size
@@ -66,7 +45,11 @@ object knnGpPredict extends LazyLogging {
         val x = featureVectorFactory.create(testItem).toDenseMatrix
 
         val trainKNNSet = knnModel.getKNN(testItem, 100)
-        //  println(trainKNNSet.size)
+
+        if(testItem.clientId==4252203) {
+          println("debug")
+        }
+        
         val xKnn = DenseVector.horzcat(trainKNNSet.map(_.x): _*).t
         val yKnn = DenseVector(trainKNNSet.map(point => log(point.demand + 1)).toArray)
 

@@ -14,7 +14,7 @@ case class LinearKnn(trainSet: Array[Item], covFunc: CovFunc, covFuncParams: Den
       KnnPoint(featureVectorFactory.create(item),item.demand)
     }.toArray 
   
-  val model = new LinearSearch(data, ItemDistance(covFunc, covFuncParams))
+  val model = new LinearSearch(data, ItemDistance())
   model.setIdenticalExcluded(false)
   
    def getKNN(item: Item, k: Int): Seq[KnnPoint] = {

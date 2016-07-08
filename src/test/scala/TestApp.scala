@@ -13,30 +13,21 @@ import breeze.numerics._
 import dk.gp.gpr.gpr
 import bimbo.data.dao.AvgLogDemandByClientDAO
 import dk.gp.gpr.gprPredict
+import bimbo.data.PgProductDetails
+import breeze.stats._
+
 object TestApp extends LazyLogging {
 
   def main(args: Array[String]): Unit = {
 
-     val clientNamesDAO = ClientNamesDAO("c:/perforce/daniel/bimbo/cliente_tabla.csv")
-    val allItemsDAO = AllTrainItemsDAO("c:/perforce/daniel/bimbo/segments/train_8.csv", clientNamesDAO)
-    val itemDAO = ItemByProductDAO(allItemsDAO)
-
-  val avgLogWeeklySaleByClientDAO = AvgLogWeeklySaleDAO("c:/perforce/daniel/bimbo/stats/clientAvgLogWeeklySale_8.csv")
-  val avgLogDemandDAO = AvgLogDemandByClientDAO("c:/perforce/daniel/bimbo/stats/avgLogDemandByClient_8.csv")
-   val items = itemDAO.getProductItems(46232)
-   val x =  DenseMatrix(items.map(item => avgLogDemandDAO.getAvgLogDemand(item.clientId).get).toArray).t
-  val y = DenseVector(items.map(item => log(item.demand+1)).toArray)
-
-
-    val gprModel = gpr(x, y, CovSEiso(), DenseVector(log(1), log(1)),log(1))
-    //  val gprModel = GprModel(x, y, CovSEiso(), DenseVector(log(1), log(1)), log(1))
-    println("covFuncParams=%s, noiseLogStdDev=%f".format(gprModel.covFuncParams, gprModel.noiseLogStdDev))
-
-    val xTest = DenseVector.rangeD(0, 17, 1).toDenseMatrix.t
-    val predicted = exp(gprPredict(xTest, gprModel)(::, 0)) - 1.0
-
-    println(DenseMatrix.horzcat(xTest, predicted.toDenseMatrix.t))
+   println( PgProductDetails("a",32,4).hashCode()== PgProductDetails("a",32,4).hashCode())
   
+   val g = dk.bayes.math.gaussian.Gaussian(1.5, 1)
+   val truncGaussian = g.truncate(0.0, true)
+   
+val v = DenseVector.tabulate(10000)(i => truncGaussian.draw)
+println(mean(v))
   }
+  
 
 }
