@@ -8,9 +8,8 @@ import breeze.linalg.norm
 import breeze.numerics._
 import breeze.linalg._
 
-case class ItemDistance() extends Metric[KnnPoint] {
+case class ItemDistance(covFuncParams:DenseVector[Double]) extends Metric[KnnPoint] {
 
-   val covFuncParams = DenseVector(-0.894756504231915, 0.3201485586333824, 0.13164100423644592, 0.12565956549127408, -0.03811224392520848, 0.39061715410444836)
   
     val logEllLogSale = exp(2*covFuncParams(1))
     val logEllClientId = exp(2*covFuncParams(2))

@@ -17,21 +17,18 @@ import breeze.linalg.DenseMatrix
 import breeze.linalg._
 import bimbo.model.knngp2.knn.LinearKnn
 import bimbo.data.dao.townstate.TownState
+import bimbo.model.knnproductlink.trainKnnProductLinkModel
 
 object knnGpPredict extends LazyLogging {
 
  // val covFuncParams = DenseVector(log(2), log(1.6))
  // val noiseLogStdDev = log(1)
   
-   val covFuncParams = DenseVector(-0.894756504231915, 0.3201485586333824, 0.13164100423644592, 0.12565956549127408, -0.03811224392520848, 0.39061715410444836)
-  val noiseLogStdDev = -0.964483
+  // val covFuncParams = DenseVector(-0.894756504231915, 0.3201485586333824, 0.13164100423644592, 0.12565956549127408, -0.03811224392520848, 0.39061715410444836)
+  //val noiseLogStdDev = -0.964483
 
-  
-  
-  //train 37360
-//    val covFuncParams = DenseVector(-0.7792494135378841, 0.4106733917231454)
-//  val noiseLogStdDev = -0.936649
-
+  val initialCovFuncParams = DenseVector(log(1), log(1),log(1), log(1),log(1), log(1))
+  val initialNoiseLogStdDev = log(1)
   
   val covFunc = KnnARDCovFunc()
 
@@ -56,8 +53,10 @@ object knnGpPredict extends LazyLogging {
       }.toList
       predictedProductDemand
     } else {
-      val knnModel = CoverTreeKnn(trainProductItems,  featureVectorFactory)
+      val knnModel = CoverTreeKnn(trainProductItems,  featureVectorFactory,initialCovFuncParams)
 
+       val (trainedCovFuncParams,trainedLikNoiseLogStdDev) = trainKnnProductLinkModel(knnModel,covFunc,initialCovFuncParams,initialNoiseLogStdDev)
+      
       var i = new AtomicInteger(1)
       val testSize = testProductItems.size
       val predictedProductDemand = testProductItems.par.map { testItem =>
@@ -70,7 +69,7 @@ object knnGpPredict extends LazyLogging {
         val xKnn = DenseVector.horzcat(trainKNNSet.map(_.x): _*).t
         val yKnn = DenseVector(trainKNNSet.map(point => log(point.demand + 1)).toArray)
 
-        val model = new GprModel(xKnn, yKnn, covFunc, covFuncParams, noiseLogStdDev, meanFunc(_, meanLogDemand))
+        val model = new GprModel(xKnn, yKnn, covFunc, trainedCovFuncParams, trainedLikNoiseLogStdDev, meanFunc(_, meanLogDemand))
         val modelEngine = GprPredictEngine(model)
         val logDemand = modelEngine.predictMean(x)(0)
 

@@ -6,7 +6,7 @@ import dk.gp.cov.CovFunc
 import bimbo.model.knngp2.util.FeatureVectorFactory
 import smile.neighbor.LinearSearch
 
-case class LinearKnn(trainSet: Array[Item], covFunc: CovFunc, covFuncParams: DenseVector[Double], featureVectorFactory: FeatureVectorFactory) {
+case class LinearKnn(trainSet: Array[Item],  covFuncParams: DenseVector[Double], featureVectorFactory: FeatureVectorFactory) {
   
   
   
@@ -14,7 +14,7 @@ case class LinearKnn(trainSet: Array[Item], covFunc: CovFunc, covFuncParams: Den
       KnnPoint(featureVectorFactory.create(item),item.demand)
     }.toArray 
   
-  val model = new LinearSearch(data, ItemDistance())
+  val model = new LinearSearch(data, ItemDistance(covFuncParams))
   model.setIdenticalExcluded(false)
   
    def getKNN(item: Item, k: Int): Seq[KnnPoint] = {

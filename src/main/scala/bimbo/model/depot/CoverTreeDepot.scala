@@ -9,14 +9,14 @@ import smile.neighbor.CoverTree
 import com.typesafe.scalalogging.slf4j.LazyLogging
 import bimbo.model.knngp2.knn.KnnPoint
 
-case class CoverTreeDepot(trainSet: Array[Item], covFunc: CovFunc, covFuncParams: DenseVector[Double], featureVectorFactory: FeatureVectorDepotFactory) extends LazyLogging {
+case class CoverTreeDepot(trainSet: Array[Item],  covFuncParams: DenseVector[Double], featureVectorFactory: FeatureVectorDepotFactory) extends LazyLogging {
 
   val data = trainSet.map { item =>
     KnnPoint(featureVectorFactory.create(item), item.demand)
   }.toArray
 
   logger.info("Building cover tree...")
-  val model = new CoverTree(data, ItemDistanceDepot(covFunc, covFuncParams))
+  val model = new CoverTree(data, ItemDistanceDepot( covFuncParams))
   model.setIdenticalExcluded(false)
   logger.info("Building cover tree...done")
 
@@ -32,7 +32,7 @@ case class CoverTreeDepot(trainSet: Array[Item], covFunc: CovFunc, covFuncParams
         knnPoints
       }
       else {
-      val linearModel = new LinearSearch(knnPoints, ItemDistanceDepot(covFunc, covFuncParams))
+      val linearModel = new LinearSearch(knnPoints, ItemDistanceDepot( covFuncParams))
       linearModel.setIdenticalExcluded(false)
       linearModel.knn(point, k).map(_.value)
       }

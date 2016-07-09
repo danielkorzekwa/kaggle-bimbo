@@ -8,14 +8,14 @@ import smile.neighbor.LinearSearch
 import smile.neighbor.CoverTree
 import com.typesafe.scalalogging.slf4j.LazyLogging
 
-case class CoverTreeKnn(trainSet: Array[Item], featureVectorFactory: FeatureVectorFactory) extends LazyLogging {
+case class CoverTreeKnn(trainSet: Array[Item], featureVectorFactory: FeatureVectorFactory,covFuncParams:DenseVector[Double]) extends LazyLogging {
 
   val data = trainSet.map { item =>
     KnnPoint(featureVectorFactory.create(item), item.demand)
   }.toArray
 
   logger.info("Building cover tree...")
-  val model = new CoverTree(data, ItemDistance())
+  val model = new CoverTree(data, ItemDistance(covFuncParams))
   model.setIdenticalExcluded(false)
   logger.info("Building cover tree...done")
 
@@ -31,7 +31,7 @@ case class CoverTreeKnn(trainSet: Array[Item], featureVectorFactory: FeatureVect
         knnPoints
       }
       else {
-      val linearModel = new LinearSearch(knnPoints, ItemDistance())
+      val linearModel = new LinearSearch(knnPoints, ItemDistance(covFuncParams))
       linearModel.setIdenticalExcluded(false)
       linearModel.knn(point, k).map(_.value)
       }

@@ -14,20 +14,19 @@ import bimbo.data.dao.AvgLogWeeklySaleDAO
 import bimbo.data.dao.ItemByDepotDAO
 import breeze.numerics._
 import bimbo.model.knngp2.knnGpPredict
-import bimbo.model.knngp2.knn.CoverTreeKnn
 import bimbo.model.knngp2.util.calcNewProductMap
 import bimbo.model.knngp2.knnGpPredict
 import bimbo.model.clientproductgp.priordemand.PriorLogDemandModel
 import breeze.stats._
+import bimbo.model.knnproductlink.trainDepotModel
 
 case class DepotModel(productMap: Map[Int, ProductDetails], trainItemDAO: ItemByProductDAO, avgLogWeeklySaleByClientDAO: AvgLogWeeklySaleDAO,
                       trainItemByPgProductDAO: ItemByPgProductDAO, townStateMap: Map[Int, TownState], clientNameMap: Map[Int, Int],
                       trainItemByDepotDAO: ItemByDepotDAO) extends LazyLogging {
 
-  val covFuncParams = DenseVector(log(2), log(1.6))
-  val noiseLogStdDev = log(1)
-
-  val covFunc = DepotCovFunc()
+  val covFunc = DepotARDCovFunc()
+  val initialCovFuncParams = DenseVector(log(1), log(1),log(1), log(1),log(1), log(1),log(1))
+  val initialNoiseLogStdDev = log(1)
 
   def predict(testItems: Seq[Item]): DenseVector[Double] = {
     val itemsByDepot = testItems.groupBy { i => i.depotId }
@@ -35,7 +34,7 @@ case class DepotModel(productMap: Map[Int, ProductDetails], trainItemDAO: ItemBy
     val i = new AtomicInteger(1)
     val predictedDemandByItem: Map[Item, Double] = itemsByDepot.toList.flatMap {
       case (depotId, depotTestItems) =>
-        if (i.getAndIncrement % 10 == 0) logger.info("Predicting depot %d/%d".format(i.get, itemsByDepot.size))
+        if (i.get % 1 == 0) logger.info("Predicting depot %d/%d".format(i.getAndIncrement, itemsByDepot.size))
         predictDepotDemand(depotId, depotTestItems)
     }.toMap
 
@@ -62,13 +61,17 @@ case class DepotModel(productMap: Map[Int, ProductDetails], trainItemDAO: ItemBy
     val featureVectorFactory = FeatureVectorDepotFactory(avgLogWeeklySaleByClientDAO, newProductMap, townStateMap, clientNameMap,productMap)
     val priorDemandModel = PriorLogDemandModel(depotTrainItems, avgLogWeeklySaleByClientDAO, null)
 
-    val knnModel = CoverTreeDepot(depotTrainItems.toArray, covFunc, covFuncParams, featureVectorFactory)
+    val knnModel = CoverTreeDepot(depotTrainItems.toArray, initialCovFuncParams, featureVectorFactory)
+
+       val (trainedCovFuncParams,trainedLikNoiseLogStdDev) = trainDepotModel(knnModel,covFunc,initialCovFuncParams,initialNoiseLogStdDev)
+     val knnModel2 = CoverTreeDepot(depotTrainItems.toArray, trainedCovFuncParams, featureVectorFactory)
 
     val y = DenseVector(depotTrainItems.map(i => log(i.demand + 1)).toArray)
     val meanLogDemand = mean(y)
 
-    val predictedDemand =  knnGpDepotPredict(knnModel, trainSize, testItems, avgLogWeeklySaleByClientDAO, townStateMap, clientNameMap,
-          featureVectorFactory, priorDemandModel, meanLogDemand)
+    val predictedDemand =  knnGpDepotPredict(knnModel2, trainSize, testItems, avgLogWeeklySaleByClientDAO, townStateMap, clientNameMap,
+          featureVectorFactory, priorDemandModel, meanLogDemand,
+          covFunc,trainedCovFuncParams,trainedLikNoiseLogStdDev)
     
     predictedDemand
   }

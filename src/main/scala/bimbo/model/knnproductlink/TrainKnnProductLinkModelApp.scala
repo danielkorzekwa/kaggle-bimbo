@@ -47,22 +47,11 @@ val clientNameIdMap = ClientNameDAO("/mnt/bimbo/cliente_tabla.csv").getClientNam
 
   def main(args: Array[String]): Unit = {
 
-    val y = DenseVector(trainItems.map(i => log(i.demand + 1)).toArray)
-    val meanLogDemand = mean(y)
+   
+    val knnModel = CoverTreeKnn(trainItems.toArray,  featureVectorFactory,covFuncParams)
 
-    val knnModel = CoverTreeKnn(trainItems.toArray,  featureVectorFactory)
-
-    val data = new Random(3450).shuffle(trainItems).take(1000).map { item =>
-
-      val trainItems = knnModel.getKNN(item, 100)
-      val xKnn = DenseVector.horzcat(trainItems.map(_.x): _*).t
-      val yKnn = DenseVector(trainItems.map(point => log(point.demand + 1)).toArray) - meanLogDemand
-      DenseMatrix.horzcat(xKnn, yKnn.toDenseMatrix.t)
-    }
-
-    val mtgprModel = MtGprModel(data, covFunc, covFuncParams, noiseLogStdDev)
-
-    val trainedModel = mtgprTrain(mtgprModel, maxIter = 20)
-    println("covFuncParams=%s, noiseLogStdDev=%f".format(trainedModel.covFuncParams, trainedModel.likNoiseLogStdDev))
+    
+    val (trainedCovFuncParams,trainedLikNoiseLogStdDev) = trainKnnProductLinkModel(knnModel,covFunc,covFuncParams,noiseLogStdDev)
+    println("covFuncParams=%s, noiseLogStdDev=%f".format(trainedCovFuncParams,trainedLikNoiseLogStdDev))
   }
 }

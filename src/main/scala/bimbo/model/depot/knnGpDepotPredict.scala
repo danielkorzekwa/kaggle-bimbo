@@ -17,18 +17,15 @@ import breeze.linalg.DenseMatrix
 import breeze.linalg._
 import bimbo.model.knngp2.knn.LinearKnn
 import bimbo.data.dao.townstate.TownState
+import dk.gp.cov.CovFunc
 
 object knnGpDepotPredict extends LazyLogging {
-
-  val covFuncParams = DenseVector(log(2), log(1.6))
-  val noiseLogStdDev = log(1)
-
-  val covFunc = DepotCovFunc()
 
   def apply(knnModel: CoverTreeDepot, trainSize: Int, testProductItems: Seq[Item], avgLogWeeklySaleDAO: AvgLogWeeklySaleDAO,
             townStateMap: Map[Int, TownState], clientNameMap: Map[Int, Int],
             featureVectorFactory: FeatureVectorDepotFactory, priorDemandModel: PriorLogDemandModel,
-            meanLogDemand: Double): Seq[(Item, Double)] = {
+            meanLogDemand: Double,
+            covFunc:CovFunc,covFuncParams:DenseVector[Double],noiseLogStdDev:Double): Seq[(Item, Double)] = {
 
     val predictedProductDemand = if (trainSize == 0) {
       val predictedProductDemand = testProductItems.par.map { testItem =>
