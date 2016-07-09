@@ -1,3 +1,6 @@
+depot model ARD learned 100
+rmse=0.45243 
+
 knn_gp(exclusing client_id from knn distance) + linked product (p + pg) - ARD learned
 rmse=0.45128
 
