@@ -19,13 +19,14 @@ import bimbo.model.knngp2.knnGpPredict
 import bimbo.model.clientproductgp.priordemand.PriorLogDemandModel
 import breeze.stats._
 import bimbo.model.knnproductlink.trainDepotModel
+import bimbo.data.dao.AvgLogPriceByProductDAO
 
 case class DepotModel(productMap: Map[Int, ProductDetails], trainItemDAO: ItemByProductDAO, avgLogWeeklySaleByClientDAO: AvgLogWeeklySaleDAO,
                       trainItemByPgProductDAO: ItemByPgProductDAO, townStateMap: Map[Int, TownState], clientNameMap: Map[Int, Int],
-                      trainItemByDepotDAO: ItemByDepotDAO) extends LazyLogging {
+                      trainItemByDepotDAO: ItemByDepotDAO,avgLogPriceDAO: AvgLogPriceByProductDAO) extends LazyLogging {
 
   val covFunc = DepotARDCovFunc()
-  val initialCovFuncParams = DenseVector(log(1), log(1),log(1), log(1),log(1), log(1),log(1))
+  val initialCovFuncParams = DenseVector(log(1), log(1),log(1), log(1),log(1), log(1),log(1),log(1))
   val initialNoiseLogStdDev = log(1)
 
   def predict(testItems: Seq[Item]): DenseVector[Double] = {
@@ -58,7 +59,7 @@ case class DepotModel(productMap: Map[Int, ProductDetails], trainItemDAO: ItemBy
 
     val trainAndTestItems = depotTrainItems ++ testItems
     val newProductMap: Map[Item, Boolean] = calcNewProductMap(trainAndTestItems)
-    val featureVectorFactory = FeatureVectorDepotFactory(avgLogWeeklySaleByClientDAO, newProductMap, townStateMap, clientNameMap,productMap)
+    val featureVectorFactory = FeatureVectorDepotFactory(avgLogWeeklySaleByClientDAO, newProductMap, townStateMap, clientNameMap,productMap,avgLogPriceDAO)
     val priorDemandModel = PriorLogDemandModel(depotTrainItems, avgLogWeeklySaleByClientDAO, null)
 
     val knnModel = CoverTreeDepot(depotTrainItems.toArray, initialCovFuncParams, featureVectorFactory)

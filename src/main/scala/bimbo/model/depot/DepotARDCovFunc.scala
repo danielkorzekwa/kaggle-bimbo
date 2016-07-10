@@ -20,6 +20,7 @@ case class DepotARDCovFunc() extends CovFunc {
     val logEllChannelId = covFuncParams(4)
     val logEllRouteId = covFuncParams(5)
     val logEllProductId = covFuncParams(6)
+    val logEllLogAvgPrice = covFuncParams(7)
 
     val logSaleCov = covSEIso.cov(x1(::, 0 to 0), x2(::, 0 to 0), DenseVector(logSf, logEllLogSale))
 
@@ -49,7 +50,9 @@ case class DepotARDCovFunc() extends CovFunc {
     val routeIdCov = covSEIso.cov(routeIdCovSqDistMat, DenseVector(log(1), logEllRouteId))
     val productIdCov = covSEIso.cov(productIdCovSqDistMat, DenseVector(log(1), logEllProductId))
 
-    val cov = logSaleCov :* clientIdCov :* depotIdCov :* channelIdCov :* routeIdCov :* productIdCov
+    val logAvgPriceCov = covSEIso.cov(x1(::, 6 to 6), x2(::, 6 to 6), DenseVector(log(1), logEllLogAvgPrice))
+
+    val cov = logSaleCov :* clientIdCov :* depotIdCov :* channelIdCov :* routeIdCov :* productIdCov //:* logAvgPriceCov
     // cov
     cov
   }
@@ -62,6 +65,7 @@ case class DepotARDCovFunc() extends CovFunc {
     val logEllChannelId = covFuncParams(4)
     val logEllRouteId = covFuncParams(5)
     val logEllProductId = covFuncParams(6)
+    val logEllLogAvgPrice = covFuncParams(7)
 
     val logSaleCov = covSEIso.cov(x1(::, 0 to 0), x2(::, 0 to 0), DenseVector(logSf, logEllLogSale))
 
@@ -91,13 +95,16 @@ case class DepotARDCovFunc() extends CovFunc {
     val routeIdCov = covSEIso.cov(routeIdCovSqDistMat, DenseVector(log(1), logEllRouteId))
     val productIdCov = covSEIso.cov(productIdCovSqDistMat, DenseVector(log(1), logEllProductId))
 
-    val logSaleCovD = covSEIso.covD(x1(::, 0 to 0), x2(::, 0 to 0), DenseVector(logSf, logEllLogSale)).map { logSaleCovD => logSaleCovD :* clientIdCov :* depotIdCov :* channelIdCov :* routeIdCov :* productIdCov }
-    val clientIdCovD = covSEIso.covD(clientIdCovSqDistMat, DenseVector(log(1), logEllClientId)).map(clientIdCovD => logSaleCov :* clientIdCovD :* depotIdCov :* channelIdCov :* routeIdCov :* productIdCov)
-    val depotIdCovD = covSEIso.covD(depotIdCovSqDistMat, DenseVector(log(1), logEllDepotId)).map(depotIdCovD => logSaleCov :* clientIdCov :* depotIdCovD :* channelIdCov :* routeIdCov :* productIdCov)
-    val channelIdD = covSEIso.covD(channelIdCovSqDistMat, DenseVector(log(1), logEllChannelId)).map(channelIdD => logSaleCov :* clientIdCov :* depotIdCov :* channelIdD :* routeIdCov :* productIdCov)
-    val routeIdD = covSEIso.covD(routeIdCovSqDistMat, DenseVector(log(1), logEllRouteId)).map(routeIdD => logSaleCov :* clientIdCov :* depotIdCov :* channelIdCov :* routeIdD)
-    val productIdCovD = covSEIso.covD(productIdCovSqDistMat, DenseVector(log(1), logEllProductId)).map(productIdCovD => logSaleCov :* clientIdCov :* depotIdCov :* channelIdCov :* routeIdCov :* productIdCovD)
+    val logAvgPriceCov = covSEIso.cov(x1(::, 6 to 6), x2(::, 6 to 6), DenseVector(log(1), logEllLogAvgPrice))
 
-    logSaleCovD :+ clientIdCovD(1) :+ depotIdCovD(1) :+ channelIdD(1) :+ routeIdD(1) :+ productIdCovD(1)
+    val logSaleCovD = covSEIso.covD(x1(::, 0 to 0), x2(::, 0 to 0), DenseVector(logSf, logEllLogSale)).map { logSaleCovD => logSaleCovD :* clientIdCov :* depotIdCov :* channelIdCov :* routeIdCov :* productIdCov :* logAvgPriceCov }
+    val clientIdCovD = covSEIso.covD(clientIdCovSqDistMat, DenseVector(log(1), logEllClientId)).map(clientIdCovD => logSaleCov :* clientIdCovD :* depotIdCov :* channelIdCov :* routeIdCov :* productIdCov :* logAvgPriceCov)
+    val depotIdCovD = covSEIso.covD(depotIdCovSqDistMat, DenseVector(log(1), logEllDepotId)).map(depotIdCovD => logSaleCov :* clientIdCov :* depotIdCovD :* channelIdCov :* routeIdCov :* productIdCov :* logAvgPriceCov)
+    val channelIdD = covSEIso.covD(channelIdCovSqDistMat, DenseVector(log(1), logEllChannelId)).map(channelIdD => logSaleCov :* clientIdCov :* depotIdCov :* channelIdD :* routeIdCov :* productIdCov :* logAvgPriceCov)
+    val routeIdD = covSEIso.covD(routeIdCovSqDistMat, DenseVector(log(1), logEllRouteId)).map(routeIdD => logSaleCov :* clientIdCov :* depotIdCov :* channelIdCov :* routeIdD :* productIdCov :* logAvgPriceCov)
+    val productIdCovD = covSEIso.covD(productIdCovSqDistMat, DenseVector(log(1), logEllProductId)).map(productIdCovD => logSaleCov :* clientIdCov :* depotIdCov :* channelIdCov :* routeIdCov :* productIdCovD :* logAvgPriceCov)
+    val logAvgPriceCovD = covSEIso.covD(x1(::, 6 to 6), x2(::, 6 to 6), DenseVector(log(1), logEllLogAvgPrice)).map(logAvgPriceCovD => logSaleCov :* clientIdCov :* depotIdCov :* channelIdCov :* routeIdCov :* productIdCov :*  logAvgPriceCovD)
+
+    logSaleCovD :+ clientIdCovD(1) :+ depotIdCovD(1) :+ channelIdD(1) :+ routeIdD(1) :+ productIdCovD(1) :+ logAvgPriceCovD(1)
   }
 }

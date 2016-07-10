@@ -24,6 +24,8 @@ import bimbo.data.dao.townstate.TownStateDAO
 import bimbo.data.dao.clientname.ClientNameDAO
 import bimbo.model.depot.DepotModel
 import bimbo.data.dao.ItemByDepotDAO
+import bimbo.data.dao.AvgLogPriceByProductDAO
+import bimbo.data.dao.AvgLogPriceByProductDAO
 
 object SubmissionApp extends LazyLogging {
 
@@ -54,6 +56,7 @@ object SubmissionApp extends LazyLogging {
     val trainItemByDepotDAO = ItemByDepotDAO(allItemsDAO)
 
     val avgLogWeeklySaleByClientDAO = AvgLogWeeklySaleDAO("/mnt/bimbo/stats/clientAvgLogWeeklySale_3_8.csv")
+val avgLogPriceDAO = AvgLogPriceByProductDAO("/mnt/bimbo/stats/avgLogPriceByProduct_3_to_8.csv")
 
     val townStateMap = TownStateDAO("/mnt/bimbo/town_state.csv").getTownStateMap()
     val clientNameIdMap = ClientNameDAO("/mnt/bimbo/cliente_tabla.csv").getClientNameIdMap()
@@ -61,15 +64,16 @@ object SubmissionApp extends LazyLogging {
     logger.info("Loading test set...")
     val allTestItemsDAO = AllTrainItemsDAO("/mnt/bimbo/segments/train_9.csv", clientNamesDAO)
     val testItemByProductDAO = ItemByProductDAO(allTestItemsDAO)
-    //   val testItems = testItemByProductDAO.getProductItems(43169)//.filter(i => i.depotId==4062 && i.clientId==4252203) // //
-    val testItems = allTestItemsDAO.getAllItems()
+     //  val testItems = testItemByProductDAO.getProductItems(37374).filter(i => i.depotId==1339) 
+    val testItems = allTestItemsDAO.getAllItems()//.filter(i => i.depotId==1339) 
     //val testItems = getTestItems(trainItemDAO, testItemByProductDAO)
 
     logger.info("Building model...")
     //    val model = ClientProductGPModel(trainItemDAO, avgLogWeeklySaleByClientDAO, null)
     //      val model = ClientProductHgprModel(trainItemDAO,avgLogWeeklySaleByClientDAO)
-   //  val model = KnnProductLinkModel(productMap, trainItemDAO, avgLogWeeklySaleByClientDAO, trainItemByPgProductDAO,townStateMap,clientNameIdMap)
-    val model = DepotModel(productMap, trainItemDAO, avgLogWeeklySaleByClientDAO, trainItemByPgProductDAO, townStateMap, clientNameIdMap,trainItemByDepotDAO)
+    // val model = KnnProductLinkModel(productMap, trainItemDAO, avgLogWeeklySaleByClientDAO, trainItemByPgProductDAO,townStateMap,clientNameIdMap)
+    val model = DepotModel(productMap, trainItemDAO, avgLogWeeklySaleByClientDAO, trainItemByPgProductDAO, townStateMap, clientNameIdMap,trainItemByDepotDAO,
+        avgLogPriceDAO)
 
     logger.info("Predicting demand...")
     val predictedDemand = model.predict(testItems) //.map(d => "%.0f".format(d).toDouble)

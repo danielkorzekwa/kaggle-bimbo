@@ -1,7 +1,10 @@
+depot model ARD learned 100 with logAvgPrice
+rmse=0.45194  
+
 depot model ARD learned 100
 rmse=0.45243 
 
-knn_gp(exclusing client_id from knn distance) + linked product (p + pg) - ARD learned
+knn_gp(exclusing client_id from knn distance) + linked product (p + pg) - ARD learned (1000)
 rmse=0.45128
 
 depot model (single cover tree for all products):

@@ -42,10 +42,6 @@ object knnGpDepotPredict extends LazyLogging {
         val x = featureVectorFactory.create(testItem).toDenseMatrix
 
         val trainKNNSet = knnModel.getKNN(testItem, 100)
-
-        if(testItem.clientId==4252203) {
-          println("debug")
-        }
         
         val xKnn = DenseVector.horzcat(trainKNNSet.map(_.x): _*).t
         val yKnn = DenseVector(trainKNNSet.map(point => log(point.demand + 1)).toArray)

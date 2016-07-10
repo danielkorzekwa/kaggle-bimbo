@@ -27,7 +27,7 @@ object trainKnnProductLinkModel {
     val meanLogDemand = mean(y)
 
     
-    val data = new Random(3450).shuffle(trainItems).take(1000).map { item =>
+    val data = new Random(3450).shuffle(trainItems).take(100).map { item =>
 
       val trainItems = coverTree.getKNN(item, 100)
       val xKnn = DenseVector.horzcat(trainItems.map(_.x): _*).t

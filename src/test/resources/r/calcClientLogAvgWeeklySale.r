@@ -7,3 +7,6 @@ Venta_hoy_avglog <- Venta_hoy_avglog[,list(Venta_hoy_avglog=mean(Venta_hoy_avglo
 
 #Compute avg log demand
 avgDemandByClient = train_all[,list(avgLogDemand = mean(log(Demanda_uni_equil+1))),by=Cliente_ID]
+
+#Compute avg price
+train_all[Venta_uni_hoy>0,list(avgLogPrice=mean(log(Venta_hoy/Venta_uni_hoy+1))),by=Producto_ID]
