@@ -18,6 +18,7 @@ case class ItemDistanceDepot(covFuncParams: DenseVector[Double]) extends Metric[
   val logEllRouteId = exp(2 * covFuncParams(5))
   val logEllProductId = exp(2 * covFuncParams(6))
   val logEllAvgLogPrice = exp(2 * covFuncParams(7))
+  // val logEllProductWeigth = exp(2 * covFuncParams(8))
 
   def d(p1: KnnPoint, p2: KnnPoint): Double = {
 
@@ -28,8 +29,15 @@ case class ItemDistanceDepot(covFuncParams: DenseVector[Double]) extends Metric[
     val d4 = if (p1.x(4) == p2.x(4)) 0.0 else 1
     val d5 = if (p1.x(5) == p2.x(5)) 0.0 else 1
     val dAvgLogPrice = p1.x(6) - p2.x(6)
-
-    (d0 * d0) / logEllLogSale + d2 / logEllDepotId + d3 / logEllChannelId + d4 / logEllRouteId + d5 / logEllProductId + (dAvgLogPrice * dAvgLogPrice) / logEllAvgLogPrice
+   // val dProductWeigth = p1.x(7) - p2.x(7)
+    
+    (d0 * d0) / logEllLogSale + 
+    d2 / logEllDepotId + 
+    d3 / logEllChannelId + 
+    d4 / logEllRouteId + 
+    d5 / logEllProductId + 
+    (dAvgLogPrice * dAvgLogPrice) / logEllAvgLogPrice //+ 
+   // (dProductWeigth*dProductWeigth) /logEllProductWeigth
   }
 
 }

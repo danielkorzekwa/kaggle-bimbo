@@ -7,6 +7,8 @@ import breeze.linalg.DenseMatrix
 import bimbo.data.dao.townstate.TownState
 import bimbo.data.ProductDetails
 import bimbo.data.dao.AvgLogPriceByProductDAO
+import bimbo.data.GenericProductDetails
+import bimbo.data.PgProductDetails
 
 case class FeatureVectorDepotFactory(avgLogWeeklySaleDAO: AvgLogWeeklySaleDAO, newProductMap: Map[Item, Boolean], townStateMap: Map[Int, TownState],
                                      clientNameMap: Map[Int, Int], productMap: Map[Int, ProductDetails], avgLogPriceDAO: AvgLogPriceByProductDAO) {
@@ -26,7 +28,13 @@ case class FeatureVectorDepotFactory(avgLogWeeklySaleDAO: AvgLogWeeklySaleDAO, n
 
   private def create(item: Item, clientLogSale: Double, avgLogPrice: Double): DenseVector[Double] = {
 
-    val productDetailsHashCode = productMap(item.productId).hashCode()
+    val productDetails = productMap(item.productId)
+    val productDetailsHashCode = productDetails.hashCode()
+//    val productWeigth = productDetails match {
+//      case productDetails:GenericProductDetails => 0d
+//      case productDetails:PgProductDetails => productDetails.g
+//    }
+    
     DenseVector(clientLogSale, item.clientId, item.depotId, item.channelId, item.routeId, productDetailsHashCode, avgLogPrice)
   }
 }

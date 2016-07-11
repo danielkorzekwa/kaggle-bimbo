@@ -38,7 +38,7 @@ object trainDepotModel {
 
     val mtgprModel = MtGprModel(data, covFunc, covFuncParams, noiseLogStdDev)
 
-    val trainedModel = mtgprTrain(mtgprModel, maxIter = 20)
+    val trainedModel = mtgprTrain(mtgprModel,  maxIter = 20)
     
     (trainedModel.covFuncParams,trainedModel.likNoiseLogStdDev)
   }

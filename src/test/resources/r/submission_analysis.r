@@ -7,7 +7,7 @@ test_all <- fread('./segments/train_9.csv')
 
 test <- test_all
 s_1 <- fread('prediction_analysis/submission._linked_ARD.csv')
-s_2 <- fread('prediction_analysis/submission_depotmodel_ard.csv')
+s_2 <- fread('prediction_analysis/submission_depotmodel_ard_logavgprice.csv')
 
 #compute se
 test$pred1 <- s_1$Demanda_uni_equil

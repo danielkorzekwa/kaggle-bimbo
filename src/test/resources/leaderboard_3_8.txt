@@ -1,5 +1,5 @@
 depot model ARD learned 100 with logAvgPrice
-rmse=0.45194  
+rmse=0.45190  
 
 depot model ARD learned 100
 rmse=0.45243 

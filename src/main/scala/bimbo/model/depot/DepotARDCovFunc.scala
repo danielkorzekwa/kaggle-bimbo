@@ -52,7 +52,10 @@ case class DepotARDCovFunc() extends CovFunc {
 
     val logAvgPriceCov = covSEIso.cov(x1(::, 6 to 6), x2(::, 6 to 6), DenseVector(log(1), logEllLogAvgPrice))
 
-    val cov = logSaleCov :* clientIdCov :* depotIdCov :* channelIdCov :* routeIdCov :* productIdCov //:* logAvgPriceCov
+   //   val productWeigthCov = covSEIso.cov(x1(::, 7 to 7), x2(::, 7 to 7), DenseVector(log(1), logEllLogAvgPrice))
+
+    
+    val cov = logSaleCov :* clientIdCov :* depotIdCov :* channelIdCov :* routeIdCov :* productIdCov :* logAvgPriceCov
     // cov
     cov
   }
