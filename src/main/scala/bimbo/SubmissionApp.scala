@@ -64,8 +64,8 @@ val avgLogPriceDAO = AvgLogPriceByProductDAO("/mnt/bimbo/stats/avgLogPriceByProd
     logger.info("Loading test set...")
     val allTestItemsDAO = AllTrainItemsDAO("/mnt/bimbo/segments/train_9.csv", clientNamesDAO)
     val testItemByProductDAO = ItemByProductDAO(allTestItemsDAO)
-    //   val testItems = testItemByProductDAO.getProductItems(36671).filter(i => i.depotId==1535 && i.clientId==591678) 
-    val testItems = allTestItemsDAO.getAllItems()//.filter(i => i.depotId==1339) 
+   //    val testItems = testItemByProductDAO.getProductItems(36671).filter(i => i.depotId==1535 && i.clientId==591678) 
+    val testItems = allTestItemsDAO.getAllItems().filter(i => i.depotId==1339) 
     //val testItems = getTestItems(trainItemDAO, testItemByProductDAO)
 
     logger.info("Building model...")

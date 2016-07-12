@@ -18,6 +18,7 @@ import breeze.linalg._
 import bimbo.model.knngp2.knn.LinearKnn
 import bimbo.data.dao.townstate.TownState
 import dk.gp.cov.CovFunc
+import bimbo.model.knngp2.knn.KnnPoint
 
 object knnGpDepotPredict extends LazyLogging {
 

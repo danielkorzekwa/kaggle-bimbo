@@ -9,6 +9,7 @@ import bimbo.data.ProductDetails
 import bimbo.data.dao.AvgLogPriceByProductDAO
 import bimbo.data.GenericProductDetails
 import bimbo.data.PgProductDetails
+import breeze.numerics._
 
 case class FeatureVectorDepotFactory(avgLogWeeklySaleDAO: AvgLogWeeklySaleDAO, newProductMap: Map[Item, Boolean], townStateMap: Map[Int, TownState],
                                      clientNameMap: Map[Int, Int], productMap: Map[Int, ProductDetails], avgLogPriceDAO: AvgLogPriceByProductDAO) {
@@ -22,7 +23,7 @@ case class FeatureVectorDepotFactory(avgLogWeeklySaleDAO: AvgLogWeeklySaleDAO, n
 
   def create(item: Item): DenseVector[Double] = {
     val clientLogSale = avgLogWeeklySaleDAO.getAvgLogWeeklySaleForClient(item.clientId).getOrElse(5.54149)
-    val avgLogPrice = avgLogPriceDAO.getAvgLogPrice(item.productId).getOrElse(2.6)
+    val avgLogPrice = avgLogPriceDAO.getAvgLogPrice(item.productId).getOrElse(2.61)//.getOrElse(2.19)
     create(item, clientLogSale, avgLogPrice)
   }
 
@@ -30,11 +31,15 @@ case class FeatureVectorDepotFactory(avgLogWeeklySaleDAO: AvgLogWeeklySaleDAO, n
 
     val productDetails = productMap(item.productId)
     val productDetailsHashCode = productDetails.hashCode()
-//    val productWeigth = productDetails match {
-//      case productDetails:GenericProductDetails => 0d
-//      case productDetails:PgProductDetails => productDetails.g
-//    }
-    
-    DenseVector(clientLogSale, item.clientId, item.depotId, item.channelId, item.routeId, productDetailsHashCode, avgLogPrice)
+    val productWeigth = productDetails match {
+      case productDetails:GenericProductDetails => log(10000+1)
+      case productDetails:PgProductDetails => log(productDetails.g+1)
+    }
+     val productShortName = productDetails match {
+      case productDetails:GenericProductDetails => productDetails.description.split(" ")(0)
+      case productDetails:PgProductDetails => productDetails.name.split(" ")(0)
+    }
+     
+    DenseVector(clientLogSale, item.clientId, item.depotId, item.channelId, item.routeId, productDetailsHashCode, avgLogPrice,productWeigth,productShortName.hashCode())
   }
 }

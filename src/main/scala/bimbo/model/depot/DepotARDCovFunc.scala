@@ -5,109 +5,107 @@ import breeze.numerics.log
 import dk.gp.cov.CovFunc
 import dk.gp.cov.CovNoise
 import dk.gp.cov.CovSEiso
+import dk.gp.cov.CovSEARDiso
 import breeze.numerics._
+import dk.bayes.math.covfunc.CovSEARDIso
 
 case class DepotARDCovFunc() extends CovFunc {
 
-  val covSEIso = CovSEiso()
+  val covSEARD = CovSEARDiso()
 
   def cov(x1: DenseMatrix[Double], x2: DenseMatrix[Double], covFuncParams: DenseVector[Double]): DenseMatrix[Double] = {
 
-    val logSf = covFuncParams(0)
-    val logEllLogSale = covFuncParams(1)
-    val logEllClientId = covFuncParams(2)
-    val logEllDepotId = covFuncParams(3)
-    val logEllChannelId = covFuncParams(4)
-    val logEllRouteId = covFuncParams(5)
-    val logEllProductId = covFuncParams(6)
-    val logEllLogAvgPrice = covFuncParams(7)
+    val lellLogSale = exp(2 * covFuncParams(1))
+    val ellClientId = exp(2 * covFuncParams(2))
+    val ellDepotId = exp(2 * covFuncParams(3))
+    val ellChannelId = exp(2 * covFuncParams(4))
+    val ellRouteId = exp(2 * covFuncParams(5))
+    val ellProductId = exp(2 * covFuncParams(6))
+    val ellLogAvgPrice = exp(2 * covFuncParams(7))
+    val ellProductWeigth = exp(2 * covFuncParams(8))
+    val ellProductShortName = exp(2 * covFuncParams(9))
 
-    val logSaleCov = covSEIso.cov(x1(::, 0 to 0), x2(::, 0 to 0), DenseVector(logSf, logEllLogSale))
+    val distMat = DenseMatrix.tabulate(x1.rows, x2.rows) { (i, j) =>
+      val dLogSale = pow(x1(i, 0) - x2(j, 0), 2)
+      val dClientId = if (x1(i, 1) == x2(j, 1)) 0d else 1.0
+      val dDepotId = if (x1(i, 2) == x2(j, 2)) 0d else 1.0
+      val dChannelId = if (x1(i, 3) == x2(j, 3)) 0d else 1.0
+      val dRouteId = if (x1(i, 4) == x2(j, 4)) 0d else 1.0
+      val dProductId = if (x1(i, 5) == x2(j, 5)) 0d else 1.0
+      val dLogAvgPrice = pow(x1(i, 6) - x2(j, 6), 2)
+      val productWeightCov = pow(x1(i, 7) - x2(j, 7), 2)
+ val dproductShortName = if (x1(i, 8) == x2(j, 8)) 0d else 1.0
 
-    val clientIdCovSqDistMat = DenseMatrix.tabulate(x1.rows, x2.rows) { (i, j) =>
-      if (x1(i, 1) == x2(j, 1)) 0d else 1.0
+      dLogSale / lellLogSale + dClientId / ellClientId + dDepotId / ellDepotId + dChannelId / ellChannelId + dRouteId / ellRouteId +
+        dProductId / ellProductId + dLogAvgPrice / ellLogAvgPrice + productWeightCov / ellProductWeigth + 
+        dproductShortName/ellProductShortName
     }
 
-    val depotIdCovSqDistMat = DenseMatrix.tabulate(x1.rows, x2.rows) { (i, j) =>
-      if (x1(i, 2) == x2(j, 2)) 0d else 1.0
-    }
+    val cov = covSEARD.cov(distMat, covFuncParams(0))
 
-    val channelIdCovSqDistMat = DenseMatrix.tabulate(x1.rows, x2.rows) { (i, j) =>
-      if (x1(i, 3) == x2(j, 3)) 0d else 1.0
-    }
-
-    val routeIdCovSqDistMat = DenseMatrix.tabulate(x1.rows, x2.rows) { (i, j) =>
-      if (x1(i, 4) == x2(j, 4)) 0d else 1.0
-    }
-
-    val productIdCovSqDistMat = DenseMatrix.tabulate(x1.rows, x2.rows) { (i, j) =>
-      if (x1(i, 5) == x2(j, 5)) 0d else 1.0
-    }
-
-    val clientIdCov = covSEIso.cov(clientIdCovSqDistMat, DenseVector(log(1), logEllClientId))
-    val depotIdCov = covSEIso.cov(depotIdCovSqDistMat, DenseVector(log(1), logEllDepotId))
-    val channelIdCov = covSEIso.cov(channelIdCovSqDistMat, DenseVector(log(1), logEllChannelId))
-    val routeIdCov = covSEIso.cov(routeIdCovSqDistMat, DenseVector(log(1), logEllRouteId))
-    val productIdCov = covSEIso.cov(productIdCovSqDistMat, DenseVector(log(1), logEllProductId))
-
-    val logAvgPriceCov = covSEIso.cov(x1(::, 6 to 6), x2(::, 6 to 6), DenseVector(log(1), logEllLogAvgPrice))
-
-   //   val productWeigthCov = covSEIso.cov(x1(::, 7 to 7), x2(::, 7 to 7), DenseVector(log(1), logEllLogAvgPrice))
-
-    
-    val cov = logSaleCov :* clientIdCov :* depotIdCov :* channelIdCov :* routeIdCov :* productIdCov :* logAvgPriceCov
-    // cov
     cov
   }
 
   def covD(x1: DenseMatrix[Double], x2: DenseMatrix[Double], covFuncParams: DenseVector[Double]): Array[DenseMatrix[Double]] = {
-    val logSf = covFuncParams(0)
-    val logEllLogSale = covFuncParams(1)
-    val logEllClientId = covFuncParams(2)
-    val logEllDepotId = covFuncParams(3)
-    val logEllChannelId = covFuncParams(4)
-    val logEllRouteId = covFuncParams(5)
-    val logEllProductId = covFuncParams(6)
-    val logEllLogAvgPrice = covFuncParams(7)
 
-    val logSaleCov = covSEIso.cov(x1(::, 0 to 0), x2(::, 0 to 0), DenseVector(logSf, logEllLogSale))
-
-    val clientIdCovSqDistMat = DenseMatrix.tabulate(x1.rows, x2.rows) { (i, j) =>
-      if (x1(i, 1) == x2(j, 1)) 0d else 1.0
+    val lellLogSale = exp(2 * covFuncParams(1))
+    val ellClientId = exp(2 * covFuncParams(2))
+    val ellDepotId = exp(2 * covFuncParams(3))
+    val ellChannelId = exp(2 * covFuncParams(4))
+    val ellRouteId = exp(2 * covFuncParams(5))
+    val ellProductId = exp(2 * covFuncParams(6))
+    val ellLogAvgPrice = exp(2 * covFuncParams(7))
+    val ellProductWeigth = exp(2 * covFuncParams(8))
+ val ellProductShortName = exp(2 * covFuncParams(9))
+ 
+    val dLogSaleMat = DenseMatrix.tabulate(x1.rows, x2.rows) { (i, j) =>
+      val dLogSale = pow(x1(i, 0) - x2(j, 0), 2)
+      dLogSale / lellLogSale
+    }
+    val dClientIdMat = DenseMatrix.tabulate(x1.rows, x2.rows) { (i, j) =>
+      val dClientId = if (x1(i, 1) == x2(j, 1)) 0d else 1.0
+      dClientId / ellClientId
+    }
+    val dDepotIdMat = DenseMatrix.tabulate(x1.rows, x2.rows) { (i, j) =>
+      val dDepotId = if (x1(i, 2) == x2(j, 2)) 0d else 1.0
+      dDepotId / ellDepotId
     }
 
-    val depotIdCovSqDistMat = DenseMatrix.tabulate(x1.rows, x2.rows) { (i, j) =>
-      if (x1(i, 2) == x2(j, 2)) 0d else 1.0
+    val dChannelIdMat = DenseMatrix.tabulate(x1.rows, x2.rows) { (i, j) =>
+      val dChannelId = if (x1(i, 3) == x2(j, 3)) 0d else 1.0
+      dChannelId / ellChannelId
     }
 
-    val channelIdCovSqDistMat = DenseMatrix.tabulate(x1.rows, x2.rows) { (i, j) =>
-      if (x1(i, 3) == x2(j, 3)) 0d else 1.0
+    val dRouteIdMat = DenseMatrix.tabulate(x1.rows, x2.rows) { (i, j) =>
+      val dRouteId = if (x1(i, 4) == x2(j, 4)) 0d else 1.0
+      dRouteId / ellRouteId
     }
 
-    val routeIdCovSqDistMat = DenseMatrix.tabulate(x1.rows, x2.rows) { (i, j) =>
-      if (x1(i, 4) == x2(j, 4)) 0d else 1.0
+    val dProductIdMat = DenseMatrix.tabulate(x1.rows, x2.rows) { (i, j) =>
+      val dProductId = if (x1(i, 5) == x2(j, 5)) 0d else 1.0
+      dProductId / ellProductId
     }
 
-    val productIdCovSqDistMat = DenseMatrix.tabulate(x1.rows, x2.rows) { (i, j) =>
-      if (x1(i, 5) == x2(j, 5)) 0d else 1.0
+    val dLogAvgPriceMat = DenseMatrix.tabulate(x1.rows, x2.rows) { (i, j) =>
+      val dLogAvgPrice = pow(x1(i, 6) - x2(j, 6), 2)
+      dLogAvgPrice / ellLogAvgPrice
     }
 
-    val clientIdCov = covSEIso.cov(clientIdCovSqDistMat, DenseVector(log(1), logEllClientId))
-    val depotIdCov = covSEIso.cov(depotIdCovSqDistMat, DenseVector(log(1), logEllDepotId))
-    val channelIdCov = covSEIso.cov(channelIdCovSqDistMat, DenseVector(log(1), logEllChannelId))
-    val routeIdCov = covSEIso.cov(routeIdCovSqDistMat, DenseVector(log(1), logEllRouteId))
-    val productIdCov = covSEIso.cov(productIdCovSqDistMat, DenseVector(log(1), logEllProductId))
+    val dproductWeightCovMat = DenseMatrix.tabulate(x1.rows, x2.rows) { (i, j) =>
+      val productWeightCov = pow(x1(i, 7) - x2(j, 7), 2)
 
-    val logAvgPriceCov = covSEIso.cov(x1(::, 6 to 6), x2(::, 6 to 6), DenseVector(log(1), logEllLogAvgPrice))
+      productWeightCov / ellProductWeigth
+    }
+    
+     val dproductShortNameCovMat = DenseMatrix.tabulate(x1.rows, x2.rows) { (i, j) =>
+      val productShortNameCov = if (x1(i, 8) == x2(j, 8)) 0d else 1.0
 
-    val logSaleCovD = covSEIso.covD(x1(::, 0 to 0), x2(::, 0 to 0), DenseVector(logSf, logEllLogSale)).map { logSaleCovD => logSaleCovD :* clientIdCov :* depotIdCov :* channelIdCov :* routeIdCov :* productIdCov :* logAvgPriceCov }
-    val clientIdCovD = covSEIso.covD(clientIdCovSqDistMat, DenseVector(log(1), logEllClientId)).map(clientIdCovD => logSaleCov :* clientIdCovD :* depotIdCov :* channelIdCov :* routeIdCov :* productIdCov :* logAvgPriceCov)
-    val depotIdCovD = covSEIso.covD(depotIdCovSqDistMat, DenseVector(log(1), logEllDepotId)).map(depotIdCovD => logSaleCov :* clientIdCov :* depotIdCovD :* channelIdCov :* routeIdCov :* productIdCov :* logAvgPriceCov)
-    val channelIdD = covSEIso.covD(channelIdCovSqDistMat, DenseVector(log(1), logEllChannelId)).map(channelIdD => logSaleCov :* clientIdCov :* depotIdCov :* channelIdD :* routeIdCov :* productIdCov :* logAvgPriceCov)
-    val routeIdD = covSEIso.covD(routeIdCovSqDistMat, DenseVector(log(1), logEllRouteId)).map(routeIdD => logSaleCov :* clientIdCov :* depotIdCov :* channelIdCov :* routeIdD :* productIdCov :* logAvgPriceCov)
-    val productIdCovD = covSEIso.covD(productIdCovSqDistMat, DenseVector(log(1), logEllProductId)).map(productIdCovD => logSaleCov :* clientIdCov :* depotIdCov :* channelIdCov :* routeIdCov :* productIdCovD :* logAvgPriceCov)
-    val logAvgPriceCovD = covSEIso.covD(x1(::, 6 to 6), x2(::, 6 to 6), DenseVector(log(1), logEllLogAvgPrice)).map(logAvgPriceCovD => logSaleCov :* clientIdCov :* depotIdCov :* channelIdCov :* routeIdCov :* productIdCov :*  logAvgPriceCovD)
+      productShortNameCov / ellProductShortName
+    }
 
-    logSaleCovD :+ clientIdCovD(1) :+ depotIdCovD(1) :+ channelIdD(1) :+ routeIdD(1) :+ productIdCovD(1) :+ logAvgPriceCovD(1)
+    val sqDistMatArray = List(dLogSaleMat, dClientIdMat, dDepotIdMat, dChannelIdMat, dRouteIdMat, dProductIdMat, dLogAvgPriceMat, dproductWeightCovMat,
+        dproductShortNameCovMat)
+    val covD = covSEARD.covD(sqDistMatArray, covFuncParams(0))
+    covD
   }
 }

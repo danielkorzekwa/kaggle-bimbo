@@ -26,7 +26,8 @@ case class DepotModel(productMap: Map[Int, ProductDetails], trainItemDAO: ItemBy
                       trainItemByDepotDAO: ItemByDepotDAO,avgLogPriceDAO: AvgLogPriceByProductDAO) extends LazyLogging {
 
   val covFunc = DepotARDCovFunc()
-  val initialCovFuncParams = DenseVector(log(1), log(1),log(1), log(1),log(1), log(1),log(1),log(1))
+  val initialCovFuncParams = DenseVector(log(1), log(1),log(1), log(1),log(1), log(1),log(1),log(1),log(1),log(1))
+  //val initialCovFuncParams = DenseVector(log(1), log(1))
   val initialNoiseLogStdDev = log(1)
 
   def predict(testItems: Seq[Item]): DenseVector[Double] = {
