@@ -1,3 +1,6 @@
+depot model ARD learned 100 with logAvgPrice with productShortName + productId
+rmse=0.45239 
+
 depot model ARD with returnRatio instead of logAvgPrice
 rmse=0.45121 
 

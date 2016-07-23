@@ -71,8 +71,8 @@ object SubmissionApp extends LazyLogging {
     logger.info("Loading test set...")
     val allTestItemsDAO = AllTrainItemsDAO("/mnt/bimbo/segments/train_9.csv", clientNamesDAO)
     val testItemByProductDAO = ItemByProductDAO(allTestItemsDAO)
-   val testItems = testItemByProductDAO.getProductItems(1278).filter(i => i.clientId == 7356474) 
-   //  val testItems = allTestItemsDAO.getAllItems()//.filter(i => i.depotId==1110)
+  // val testItems = testItemByProductDAO.getProductItems(1278).filter(i => i.clientId == 7356474) 
+     val testItems = allTestItemsDAO.getAllItems()//.filter(i => i.depotId==1110)
     //val testItems = getTestItems(trainItemDAO, testItemByProductDAO)
 
     logger.info("Building model...")

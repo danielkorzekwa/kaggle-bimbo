@@ -45,6 +45,7 @@ case class FeatureVectorDepotFactory(avgLogWeeklySaleDAO: AvgLogWeeklySaleDAO, n
      
      val returnRatio = returnRatioDao.getReturnRatio(item.clientId).getOrElse(0.01847921)
      
-    DenseVector(clientLogSale, item.clientId, item.depotId, item.channelId, item.routeId, productDetailsHashCode, avgLogPrice,productWeigth,productShortName.hashCode())
+    DenseVector(clientLogSale, item.clientId, item.depotId, item.channelId, item.routeId, productDetailsHashCode, avgLogPrice,productWeigth,productShortName.hashCode(),
+        item.productId)
   }
 }

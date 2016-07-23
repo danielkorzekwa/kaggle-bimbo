@@ -10,10 +10,11 @@ case class ItemDistanceCalc(covFuncParams: DenseVector[Double]) {
   val ellDepotId = exp(2 * covFuncParams(3))
   val ellChannelId = exp(2 * covFuncParams(4))
   val ellRouteId = exp(2 * covFuncParams(5))
-  val ellProductId = exp(2 * covFuncParams(6))
+  val ellProductDetailsId = exp(2 * covFuncParams(6))
   val ellLogAvgPrice = exp(2 * covFuncParams(7))
   val ellProductWeigth = exp(2 * covFuncParams(8))
   val ellProductShortName = exp(2 * covFuncParams(9))
+val ellProductId = exp(2 * covFuncParams(10))
 
   def calcDistance(x1: DenseVector[Double], x2: DenseVector[Double]): Double = {
 
@@ -22,15 +23,16 @@ case class ItemDistanceCalc(covFuncParams: DenseVector[Double]) {
     val dDepotId = if (x1(2) == x2(2)) 0d else 1.0
     val dChannelId = if (x1(3) == x2(3)) 0d else 1.0
     val dRouteId = if (x1(4) == x2(4)) 0d else 1.0
-    val dProductId = if (x1(5) == x2(5)) 0d else 1.0
+    val dProductDetailsId = if (x1(5) == x2(5)) 0d else 1.0
     val dLogAvgPrice = pow(x1(6) - x2(6), 2)
     val productWeightCov = pow(x1(7) - x2(7), 2)
     val dproductShortName = if (x1(8) == x2(8)) 0d else 1.0
+    val dProductId = if (x1(9) == x2(9)) 0d else 1.0
     //val dAvgLogDemand = pow(x1(i, 9) - x2(j, 9), 2)
 
     dLogSale / lellLogSale + dClientId / ellClientId + dDepotId / ellDepotId + dChannelId / ellChannelId + dRouteId / ellRouteId +
-      dProductId / ellProductId + dLogAvgPrice / ellLogAvgPrice + productWeightCov / ellProductWeigth +
-      dproductShortName / ellProductShortName //+ dAvgLogDemand/ellAvgLogDemand
+      dProductDetailsId / ellProductDetailsId + dLogAvgPrice / ellLogAvgPrice + productWeightCov / ellProductWeigth +
+      dproductShortName / ellProductShortName + dProductId/ellProductId
   }
 
   def calcDistance(x1: DenseMatrix[Double], x2: DenseMatrix[Double]): DenseMatrix[Double] = {
@@ -65,9 +67,9 @@ case class ItemDistanceCalc(covFuncParams: DenseVector[Double]) {
       dRouteId / ellRouteId
     }
 
-    val dProductIdMat = DenseMatrix.tabulate(x1.rows, x2.rows) { (i, j) =>
-      val dProductId = if (x1(i, 5) == x2(j, 5)) 0d else 1.0
-      dProductId / ellProductId
+    val dProductDetailsIdMat = DenseMatrix.tabulate(x1.rows, x2.rows) { (i, j) =>
+      val dProductDetailsId = if (x1(i, 5) == x2(j, 5)) 0d else 1.0
+      dProductDetailsId / ellProductDetailsId
     }
 
     val dLogAvgPriceMat = DenseMatrix.tabulate(x1.rows, x2.rows) { (i, j) =>
@@ -86,15 +88,17 @@ case class ItemDistanceCalc(covFuncParams: DenseVector[Double]) {
 
       productShortNameCov / ellProductShortName
     }
+    
+    val dproductIdCovMat = DenseMatrix.tabulate(x1.rows, x2.rows) { (i, j) =>
+      val productIdov = if (x1(i, 9) == x2(j, 9)) 0d else 1.0
 
-    //     val dAvgLogDemandCovMat = DenseMatrix.tabulate(x1.rows, x2.rows) { (i, j) =>
-    //      val avgLogDemandCov = pow(x1(i, 9) - x2(j, 9), 2)
-    //
-    //      avgLogDemandCov / ellAvgLogDemand
-    //    }
+      productIdov / ellProductId
+    }
 
-    val sqDistMatArray = List(dLogSaleMat, dClientIdMat, dDepotIdMat, dChannelIdMat, dRouteIdMat, dProductIdMat, dLogAvgPriceMat, dproductWeightCovMat,
-      dproductShortNameCovMat)
+   
+
+    val sqDistMatArray = List(dLogSaleMat, dClientIdMat, dDepotIdMat, dChannelIdMat, dRouteIdMat, dProductDetailsIdMat, dLogAvgPriceMat, dproductWeightCovMat,
+      dproductShortNameCovMat,dproductIdCovMat)
 
     sqDistMatArray
   }
