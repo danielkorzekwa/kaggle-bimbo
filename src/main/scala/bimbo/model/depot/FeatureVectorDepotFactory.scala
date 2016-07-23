@@ -10,10 +10,13 @@ import bimbo.data.dao.AvgLogPriceByProductDAO
 import bimbo.data.GenericProductDetails
 import bimbo.data.PgProductDetails
 import breeze.numerics._
+import bimbo.data.dao.AvgLogDemandByClientDAO
+import bimbo.data.dao.ReturnRatioDAO
 
 case class FeatureVectorDepotFactory(avgLogWeeklySaleDAO: AvgLogWeeklySaleDAO, newProductMap: Map[Item, Boolean], townStateMap: Map[Int, TownState],
-                                     clientNameMap: Map[Int, Int], productMap: Map[Int, ProductDetails], avgLogPriceDAO: AvgLogPriceByProductDAO) {
-
+                                     clientNameMap: Map[Int, Int], productMap: Map[Int, ProductDetails], 
+                                     avgLogPriceDAO: AvgLogPriceByProductDAO,returnRatioDao:ReturnRatioDAO) {
+  
   def create(items: Seq[Item]): DenseMatrix[Double] = {
     val itemFeatureVectors = items.map { item =>
       create(item)
@@ -39,6 +42,8 @@ case class FeatureVectorDepotFactory(avgLogWeeklySaleDAO: AvgLogWeeklySaleDAO, n
       case productDetails:GenericProductDetails => productDetails.description.split(" ")(0)
       case productDetails:PgProductDetails => productDetails.name.split(" ")(0)
     }
+     
+     val returnRatio = returnRatioDao.getReturnRatio(item.clientId).getOrElse(0.01847921)
      
     DenseVector(clientLogSale, item.clientId, item.depotId, item.channelId, item.routeId, productDetailsHashCode, avgLogPrice,productWeigth,productShortName.hashCode())
   }

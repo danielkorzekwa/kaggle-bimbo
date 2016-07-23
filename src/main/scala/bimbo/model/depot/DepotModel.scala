@@ -20,15 +20,17 @@ import bimbo.model.clientproductgp.priordemand.PriorLogDemandModel
 import breeze.stats._
 import bimbo.model.knnproductlink.trainDepotModel
 import bimbo.data.dao.AvgLogPriceByProductDAO
+import bimbo.data.dao.ReturnRatioDAO
 
 case class DepotModel(productMap: Map[Int, ProductDetails], trainItemDAO: ItemByProductDAO, avgLogWeeklySaleByClientDAO: AvgLogWeeklySaleDAO,
                       trainItemByPgProductDAO: ItemByPgProductDAO, townStateMap: Map[Int, TownState], clientNameMap: Map[Int, Int],
-                      trainItemByDepotDAO: ItemByDepotDAO,avgLogPriceDAO: AvgLogPriceByProductDAO) extends LazyLogging {
+                      trainItemByDepotDAO: ItemByDepotDAO,avgLogPriceDAO: AvgLogPriceByProductDAO,
+                      returnRatioDao:ReturnRatioDAO) extends LazyLogging {
 
   val covFunc = DepotARDCovFunc()
   val initialCovFuncParams = DenseVector(log(1), log(1),log(1), log(1),log(1), log(1),log(1),log(1),log(1),log(1))
-  //val initialCovFuncParams = DenseVector(log(1), log(1))
   val initialNoiseLogStdDev = log(1)
+  
 
   def predict(testItems: Seq[Item]): DenseVector[Double] = {
     val itemsByDepot = testItems.groupBy { i => i.depotId }
@@ -60,7 +62,8 @@ case class DepotModel(productMap: Map[Int, ProductDetails], trainItemDAO: ItemBy
 
     val trainAndTestItems = depotTrainItems ++ testItems
     val newProductMap: Map[Item, Boolean] = calcNewProductMap(trainAndTestItems)
-    val featureVectorFactory = FeatureVectorDepotFactory(avgLogWeeklySaleByClientDAO, newProductMap, townStateMap, clientNameMap,productMap,avgLogPriceDAO)
+    val featureVectorFactory = FeatureVectorDepotFactory(avgLogWeeklySaleByClientDAO, newProductMap, townStateMap, clientNameMap,productMap,avgLogPriceDAO,
+        returnRatioDao)
     val priorDemandModel = PriorLogDemandModel(depotTrainItems, avgLogWeeklySaleByClientDAO, null)
 
     val knnModel = CoverTreeDepot(depotTrainItems.toArray, initialCovFuncParams, featureVectorFactory)

@@ -27,10 +27,10 @@ object knnGpPredict extends LazyLogging {
   // val covFuncParams = DenseVector(-0.894756504231915, 0.3201485586333824, 0.13164100423644592, 0.12565956549127408, -0.03811224392520848, 0.39061715410444836)
   //val noiseLogStdDev = -0.964483
 
-  val initialCovFuncParams = DenseVector(log(1), log(1),log(1), log(1),log(1), log(1))
+  val initialCovFuncParams = DenseVector(log(1), log(1),log(10000))
   val initialNoiseLogStdDev = log(1)
   
-  val covFunc = KnnARDCovFunc()
+  val covFunc = KnnARDCovFunc2()
 
   def apply(trainProductItems: Array[Item], testProductItems: Seq[Item], avgLogWeeklySaleDAO: AvgLogWeeklySaleDAO,
             townStateMap: Map[Int, TownState],clientNameMap:Map[Int,Int]   ): Seq[(Item, Double)] = {
@@ -56,7 +56,8 @@ object knnGpPredict extends LazyLogging {
       val knnModel = CoverTreeKnn(trainProductItems,  featureVectorFactory,initialCovFuncParams)
 
        val (trainedCovFuncParams,trainedLikNoiseLogStdDev) = trainKnnProductLinkModel(knnModel,covFunc,initialCovFuncParams,initialNoiseLogStdDev)
-      
+        val knnModel2 = CoverTreeKnn(trainProductItems.toArray, featureVectorFactory, trainedCovFuncParams)
+       
       var i = new AtomicInteger(1)
       val testSize = testProductItems.size
       val predictedProductDemand = testProductItems.par.map { testItem =>
@@ -64,7 +65,7 @@ object knnGpPredict extends LazyLogging {
         if (i.getAndIncrement % 1000 == 0) logger.info("Predicting %d/%d".format(i.get, testSize))
         val x = featureVectorFactory.create(testItem).toDenseMatrix
 
-        val trainKNNSet = knnModel.getKNN(testItem, 100)
+        val trainKNNSet = knnModel2.getKNN(testItem, 100)
         //  println(trainKNNSet.size)
         val xKnn = DenseVector.horzcat(trainKNNSet.map(_.x): _*).t
         val yKnn = DenseVector(trainKNNSet.map(point => log(point.demand + 1)).toArray)

@@ -29,10 +29,10 @@ class calcNewProductMapTest {
     //key (clientId,productId), value - true is client product has not been see yet before.
     val newProductMap: Map[Item, Boolean] = calcNewProductMap(items)
 
-    val existingProduct = Item(9, 1346, 1, 1215, 2374386, "MARGARITA GARCIA PEREZ", 43231, 8.0)
+    val existingProduct = Item(9, 1346, 1, 1215, 2374386, "MARGARITA GARCIA PEREZ", 43231, 4,8.0)
     assertFalse(newProductMap(existingProduct))
 
-    val newProduct = Item(9, 1387, 1, 1012, 408251, "SALVADOR SAUCEDO PENA", 43231, 2.0)
+    val newProduct = Item(9, 1387, 1, 1012, 408251, "SALVADOR SAUCEDO PENA", 43231, 4,2.0)
     assertTrue(newProductMap(newProduct))
 
     val isNewProductVec = DenseMatrix(testItems.map(i => if(newProductMap(i)) 1.0 else 0).toArray).t

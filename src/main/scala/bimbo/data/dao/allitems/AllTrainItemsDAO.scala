@@ -28,11 +28,12 @@ case class AllTrainItemsDAO(itemsFile: String, clientNamesDAO: ClientNamesDAO) e
     val routeId = lArray(3).toInt
     val clientId = lArray(4).toInt
     val productId = lArray(5).toInt
+    val ret = lArray(8).toDouble
     val demand = lArray(10).toDouble
 
     val clientName = clientsNameByClientIdMap(clientId)
 
-    val item = Item(weekId, depotId, channelId, routeId, clientId, clientName, productId, demand)
+    val item = Item(weekId, depotId, channelId, routeId, clientId, clientName, productId, ret,demand)
 
     item
   }

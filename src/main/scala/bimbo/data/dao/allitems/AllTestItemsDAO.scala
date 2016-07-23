@@ -28,11 +28,12 @@ case class AllTestItemsDAO(itemsFile: String, clientNamesDAO: ClientNamesDAO) ex
     val routeId = lArray(4).toInt
     val clientId = lArray(5).toInt
     val productId = lArray(6).toInt
+     val ret = lArray(9).toDouble
     val demand = Double.NaN
 
     val clientName = clientsNameByClientIdMap(clientId)
 
-    val item = Item(weekId, depotId, channelId, routeId, clientId, clientName, productId, demand)
+    val item = Item(weekId, depotId, channelId, routeId, clientId, clientName, productId, ret,demand)
 
     item
   }

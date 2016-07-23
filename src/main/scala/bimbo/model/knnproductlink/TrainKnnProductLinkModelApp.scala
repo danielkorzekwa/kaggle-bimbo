@@ -1,7 +1,6 @@
 package bimbo.model.knnproductlink
 
 import dk.gp.mtgpr.mtgprTrain
-import bimbo.model.knngp2.KnnGP2CovFunc2
 import breeze.linalg.DenseVector
 import breeze.numerics._
 import dk.gp.mtgpr.MtGprModel

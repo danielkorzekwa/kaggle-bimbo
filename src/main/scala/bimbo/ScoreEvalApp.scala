@@ -13,6 +13,7 @@ import breeze.linalg.DenseVector
 import breeze.linalg.csvread
 import breeze.numerics.log
 import dk.bayes.math.accuracy.rmse
+import scala.util.Random
 
 object ScoreEvalApp extends LazyLogging {
 
@@ -27,9 +28,9 @@ object ScoreEvalApp extends LazyLogging {
     val allTestItemsDAO = AllTrainItemsDAO("/mnt/bimbo/segments/train_9.csv", clientNamesDAO)
     val testItemByProductDAO = ItemByProductDAO(allTestItemsDAO)
 
-   // val testItems = testItemByProductDAO.getProductItems(37374).filter(i => i.depotId==1339) // //
-   //val testItems = getTestItems(trainItemDAO, testItemByProductDAO)
-    val testItems = allTestItemsDAO.getAllItems().filter(i => i.depotId==1339) 
+  // val testItems = testItemByProductDAO.getProductItems(33794).filter(i => i.clientId==57450) 
+  // val testItems = getTestItems(trainItemDAO, testItemByProductDAO)
+     val testItems = allTestItemsDAO.getAllItems()//.filter(i => i.depotId==1110)
    
 
     val predictionData = csvread(new File("target/submission.csv"), skipLines = 1)

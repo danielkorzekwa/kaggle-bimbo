@@ -19,6 +19,7 @@ import bimbo.model.knngp2.knn.LinearKnn
 import bimbo.data.dao.townstate.TownState
 import dk.gp.cov.CovFunc
 import bimbo.model.knngp2.knn.KnnPoint
+import bimbo.model.knnproductlink.trainDepotModel
 
 object knnGpDepotPredict extends LazyLogging {
 
@@ -42,12 +43,17 @@ object knnGpDepotPredict extends LazyLogging {
         if (i.getAndIncrement % 1000 == 0) logger.info("Predicting %d/%d".format(i.get, testSize))
         val x = featureVectorFactory.create(testItem).toDenseMatrix
 
+        
+        val trainData = List(testItem)
+         val (trainedCovFuncParams,trainedLikNoiseLogStdDev) =  (covFuncParams,noiseLogStdDev)
+     //     val (trainedCovFuncParams,trainedLikNoiseLogStdDev) =  trainDepotModel(trainData,knnModel,covFunc,covFuncParams,noiseLogStdDev)
+        
         val trainKNNSet = knnModel.getKNN(testItem, 100)
         
         val xKnn = DenseVector.horzcat(trainKNNSet.map(_.x): _*).t
         val yKnn = DenseVector(trainKNNSet.map(point => log(point.demand + 1)).toArray)
 
-        val model = new GprModel(xKnn, yKnn, covFunc, covFuncParams, noiseLogStdDev, meanFunc(_, meanLogDemand))
+        val model = new GprModel(xKnn, yKnn, covFunc, trainedCovFuncParams, trainedLikNoiseLogStdDev, meanFunc(_, meanLogDemand))
         val modelEngine = GprPredictEngine(model)
         val logDemand = modelEngine.predictMean(x)(0)
 

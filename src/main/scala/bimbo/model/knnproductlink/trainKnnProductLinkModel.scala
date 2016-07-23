@@ -37,7 +37,7 @@ object trainKnnProductLinkModel {
 
     val mtgprModel = MtGprModel(data, covFunc, covFuncParams, noiseLogStdDev)
 
-    val trainedModel = mtgprTrain(mtgprModel, maxIter = 20)
+    val trainedModel = mtgprTrain(mtgprModel, maxIter = 200)
     
     (trainedModel.covFuncParams,trainedModel.likNoiseLogStdDev)
   }

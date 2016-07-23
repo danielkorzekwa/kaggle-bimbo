@@ -28,7 +28,7 @@ clientNameMap:Map[Int,Int]
      // val stateId = townStateMap(item.depotId).stateId
     val clientNameId = clientNameMap(item.clientId)
     
-    DenseVector(clientLogSale, item.clientId, item.depotId, item.channelId, item.routeId,clientNameId)
+    DenseVector(clientLogSale, item.clientId, item.depotId, item.channelId, item.routeId,clientNameId,item.weekId)
    // DenseVector(clientLogSale, item.clientId, item.depotId, item.channelId, item.routeId,isNewProduct)
   }
 }

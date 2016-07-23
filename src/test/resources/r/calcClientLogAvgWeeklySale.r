@@ -10,3 +10,7 @@ avgDemandByClient = train_all[,list(avgLogDemand = mean(log(Demanda_uni_equil+1)
 
 #Compute avg price
 train_all[Venta_uni_hoy>0,list(avgLogPrice=mean(log(Venta_hoy/Venta_uni_hoy+1))),by=Producto_ID]
+
+#Compute return ratio
+train_all$return_ratio <- train_all$Dev_uni_proxima / (train_all$Dev_uni_proxima + train_all$Venta_uni_hoy)
+avgReturnRatioByClient <- train_all[,list(avgReturnRatio=mean(return_ratio)),by=Cliente_ID]
